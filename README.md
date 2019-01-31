@@ -6,8 +6,8 @@
 
 1. Retrieve a Structural Definitions Exchange Message: http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest
 2. Iterate over all dataflows: select data structure use StructureParser (source see below): We should be able to use an SDMXBean for that.
-3. Retrieve the data structure message: http://ec.europa.eu/eurostat/SDMX/diss-web/rest/datastructure/ESTAT/<data structure>
-4. Data structure messages are the input for the Transformer (simple XML)
+3. Retrieve the data structure message: http://ec.europa.eu/eurostat/SDMX/diss-web/rest/datastructure/ESTAT/$dataStructure
+4. Data structure messages are the input for the Transformer (simple XML).
 
 
 ### Transform
@@ -21,9 +21,9 @@
 
 | ID | Field                    | Value |
 | -- | ------------------------ | ----- |
-| 1  | Identifier               | http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/<data structure id>?d1_name=d1x_name&d2_name=d2y_name...dn_name=d2z_name |
+| 1  | Identifier               | http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/$dataStructureId?d1_name=d1x_name&d2_name=d2y_name...dn_name=d2z_name |
 | 2  | Creator                  | - |
-| 3  | Title                    | <name of the data structure> (<name of code d1x>, <name of code d2y>, ... <name of code dnz>) |
+| 3  | Title                    | $dataStructureName ($coded1xName, $coded2yName, ... $codednzName) |
 | 4  | Publisher                | configurable: "Eurostat" |
 | 5  | PublicationYear          | (maybe dimension TIME in the future) |
 | 6  | Subject                  | Each pair dimension name and code name a subject |
