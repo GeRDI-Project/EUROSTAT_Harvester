@@ -12,10 +12,10 @@
 1. Get all dimensions (keep english description of code); eventually select dimensions as configured.
 2. Get all codes for each selected dimension (keep english description of code).
    Let d1, d2,..., dn be the number selected dimensions and dxN the number of codes for dimension dx: We then have d1N x d2N x ... x dnN manifestation of a data structure (Eurostat: 6360)
-3. Iterate over each manifestation and create a DataCiteJson object:
+3. Iterate over each manifestation and create a DataCiteJson object
 
 | ID | Field                    | Value |
-| -: | :----------------------- | :---- |
+| -- | ------------------------ | ----- |
 | 1  | Identifier               | http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/<data structure id>?d1_name=d1x_name&d2_name=d2y_name...dn_name=d2z_name |
 | 2  | Creator                  | - |
 | 3  | Title                    | <name of the data structure> (<name of code d1x>, <name of code d2y>, ... <name of code dnz>) |
@@ -36,7 +36,7 @@
 | 18 | GeoLocation              | (maybe CL_GEO in the future) |
 | 19 | FundingReference         | - |
 
-Loader
+### Loader
 We will use the standard loader for the ES scheme.
 
 ## References & Resources
