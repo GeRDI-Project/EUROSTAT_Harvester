@@ -9,6 +9,7 @@
 3. Retrieve the data structure message: http://ec.europa.eu/eurostat/SDMX/diss-web/rest/datastructure/ESTAT/<data structure>
 4. Data structure messages are the input for the Transformer (simple XML)
 
+
 ### Transform
 
 1. Use a StructureParser to create a SDMXBean out of the SDMX-ML describing the data structure message.
@@ -16,6 +17,7 @@
 3. Get all codes for each selected dimension (keep english description of code).
    Let d1, d2,..., dn be the number selected dimensions and dxN the number of codes for dimension dx: We then have d1N x d2N x ... x dnN manifestation of a data structure (Eurostat: 6360)
 4. Iterate over each manifestation and create a DataCiteJson object
+
 
 | ID | Field                    | Value |
 | -- | ------------------------ | ----- |
