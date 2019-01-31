@@ -1,0 +1,22 @@
+/**
+ * Copyright © 2019 Tobias Weber (http://www.gerdi-project.de)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * This package contains {@linkplain de.gerdiproject.harvest.etls.transformers.ITransformer}s
+ * for transforming EUROSTAT metadata to {@linkplain de.gerdiproject.json.datacite.DataCiteJson} objects.
+ *
+ * @author Tobias Weber
+ */
+package de.gerdiproject.harvest.etls.transformers;

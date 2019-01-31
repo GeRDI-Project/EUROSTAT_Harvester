@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.gerdi-project</groupId>
+		<artifactId>GeRDI-parent-harvester</artifactId>
+		<version>7.3.1-SNAPSHOT</version>
+	</parent>
+	
+	<artifactId>EUROSTAT-HarvesterService</artifactId>
+    <packaging>war</packaging>
+	<name>EUROSTAT Harvester Service</name>
+	<description>This is a restful harvester for retrieving data from https://ec.europa.eu/eurostat</description>
+	<inceptionYear>2019</inceptionYear>
+  
+	<developers>
+		<developer>
+			<name>Tobias Weber</name>
+			<email>weber@lrz.de</email>
+			<organization>Leibniz Supercomputing Centre</organization>
+			<organizationUrl>https://www.lrz.de</organizationUrl>
+		</developer>
+	</developers>
+	
+	<!-- Define Sonatype repository for retrieving SNAPSHOT versions -->
+	<repositories>
+		<repository>
+			<id>Sonatype</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
+	</repositories>
+</project>
