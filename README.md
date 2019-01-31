@@ -15,6 +15,7 @@
 3. Iterate over each manifestation and create a DataCiteJson object:
 
 | ID | Field                    | Value |
+| -: | :----------------------- | :---- |
 | 1  | Identifier               | http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/<data structure id>?d1_name=d1x_name&d2_name=d2y_name...dn_name=d2z_name |
 | 2  | Creator                  | - |
 | 3  | Title                    | <name of the data structure> (<name of code d1x>, <name of code d2y>, ... <name of code dnz>) |
