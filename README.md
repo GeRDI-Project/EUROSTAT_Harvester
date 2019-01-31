@@ -20,26 +20,26 @@
 
 
 | ID | Field                    | Value |
-| -- | ------------------------ | ----- |
+| ---|--------------------------|-------|
 | 1  | Identifier               | http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/$dataStructureId?d1_name=d1x_name&d2_name=d2y_name...dn_name=d2z_name |
-| 2  | Creator                  | - |
+| 2  | Creator                  | blank |
 | 3  | Title                    | $dataStructureName ($coded1xName, $coded2yName, ... $codednzName) |
 | 4  | Publisher                | configurable: "Eurostat" |
 | 5  | PublicationYear          | (maybe dimension TIME in the future) |
 | 6  | Subject                  | Each pair dimension name and code name a subject |
-| 7  | Contributor              | - |
+| 7  | Contributor              | blank |
 | 8  | Date                     | (maybe dimension TIME in the future) |
 | 9  | Language                 | configurable: "en" |
 | 10 | ResourceType             | Statistical Data (ResourceTypeGeneral |  Dataset) |
-| 11 | AlternativeIdentifier    | (maybe urn-scheme in the future) |
-| 12 | RelatedIdentifier        | - |
-| 13 | Size                     | - |
+| 11 | AlternativeIdentifier    | (maybe urnblankscheme in the future) |
+| 12 | RelatedIdentifier        | blank |
+| 13 | Size                     | blank |
 | 14 | Format                   | configurable: "application/json" |
-| 15 | Version                  | - |
+| 15 | Version                  | blank |
 | 16 | Rights                   | configurable: "Eurostat License" with rightsUri set to "https | //ec.europa.eu/eurostat/about/policies/copyright" (configurable) |
 | 17 | Description              | Automatic compiled text from descriptions of data flows, dimensions and Codelist |
 | 18 | GeoLocation              | (maybe CL_GEO in the future) |
-| 19 | FundingReference         | - |
+| 19 | FundingReference         | blank |
 
 ### Loader
 
