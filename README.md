@@ -1,18 +1,21 @@
 # SDMX Harvester
 
 ## Harvest approach
+
 ### Extract
+
 1. Retrieve a Structural Definitions Exchange Message: http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest
 2. Iterate over all dataflows: select data structure use StructureParser (source see below): We should be able to use an SDMXBean for that.
 3. Retrieve the data structure message: http://ec.europa.eu/eurostat/SDMX/diss-web/rest/datastructure/ESTAT/<data structure>
 4. Data structure messages are the input for the Transformer (simple XML)
 
 ### Transform
-0. Use a StructureParser to create a SDMXBean out of the SDMX-ML describing the data structure message.
-1. Get all dimensions (keep english description of code); eventually select dimensions as configured.
-2. Get all codes for each selected dimension (keep english description of code).
+
+1. Use a StructureParser to create a SDMXBean out of the SDMX-ML describing the data structure message.
+2. Get all dimensions (keep english description of code); eventually select dimensions as configured.
+3. Get all codes for each selected dimension (keep english description of code).
    Let d1, d2,..., dn be the number selected dimensions and dxN the number of codes for dimension dx: We then have d1N x d2N x ... x dnN manifestation of a data structure (Eurostat: 6360)
-3. Iterate over each manifestation and create a DataCiteJson object
+4. Iterate over each manifestation and create a DataCiteJson object
 
 | ID | Field                    | Value |
 | -- | ------------------------ | ----- |
@@ -37,9 +40,11 @@
 | 19 | FundingReference         | - |
 
 ### Loader
+
 We will use the standard loader for the ES scheme.
 
 ## References & Resources
+
 * https://ec.europa.eu/eurostat/web/sdmx-web-services/sdmx (SDMX for eurostat)
 * https://sdmx.org/wp-content/uploads/ecb-tutorial.html#id258974  (rough overview over sdmx)
 * http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest (example  Structural Definitions Exchange Message)
