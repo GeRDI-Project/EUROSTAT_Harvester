@@ -29,12 +29,12 @@ public class EUROSTATConstants
     // URLs
     // Structural Data Exchange Message (SDEM)
     public static final String SDEM_URL_KEY = "sdemUrl";
-    public static final String SDEM_URL_DEFAULT_VALUE 
+    public static final String SDEM_URL_DEFAULT_VALUE
         = "http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest";
     public static final String LOGO_URL_KEY = "logoUrl";
     public static final String LOGO_URL_DEFAULT_VALUE = "";
 
-    // Metadata default values 
+    // Metadata default values
     public static final String PUBLISHER_KEY = "publisher";
     public static final String PUBLISHER_DEFAULT_VALUE = "Eurostat";
     public static final String LANGUAGE_KEY = "language";
@@ -44,14 +44,14 @@ public class EUROSTATConstants
     public static final String RIGHTS_NAME_KEY = "rightsName";
     public static final String RIGHTS_NAME_DEFAULT_VALUE = "Eurostat License";
     public static final String RIGHTS_URI_KEY = "rightsUri";
-    public static final String RIGHTS_URI_DEFAULT_VALUE 
+    public static final String RIGHTS_URI_DEFAULT_VALUE
         = "https://ec.europa.eu/eurostat/about/policies/copyright";
 
     // Errors
     public static final String CANNOT_HARVEST = "Cannot harvest: ";
-    public static final String CANNOT_CREATE_TRANSFORMER = "Cannot create transformer!"; 
-    public static final String MALFORMED_SDEM_URL_ERROR = "You must correctly set the '" 
-        + EUROSTATConstants.SDEM_URL_KEY 
-        + "'-parameter in the config!";
+    public static final String CANNOT_CREATE_TRANSFORMER = "Cannot create transformer!";
+    public static final String MALFORMED_SDEM_URL_ERROR = "You must correctly set the '"
+                                                          + EUROSTATConstants.SDEM_URL_KEY
+                                                          + "'-parameter in the config!";
     public static final String NO_RECORDS_ERROR = "The URL '%s' did not yield any harvestable records! Change the parameters in the config!";
 }

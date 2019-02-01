@@ -73,53 +73,53 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
         // register parameters
         // Structural Definition Exchange Message (SDEM)
         this.sdemUrlParam = Configuration.registerParameter(
-                new StringParameter(
-                    EUROSTATConstants.SDEM_URL_KEY,
-                    getName(),
-                    EUROSTATConstants.SDEM_URL_DEFAULT_VALUE,
-                    urlMappingFunction));
+                                new StringParameter(
+                                    EUROSTATConstants.SDEM_URL_KEY,
+                                    getName(),
+                                    EUROSTATConstants.SDEM_URL_DEFAULT_VALUE,
+                                    urlMappingFunction));
 
         this.logoUrlParam = Configuration.registerParameter(
-                new StringParameter(
-                    EUROSTATConstants.LOGO_URL_KEY,
-                    getName(),
-                    EUROSTATConstants.LOGO_URL_DEFAULT_VALUE,
-                    stringMappingFunction));
+                                new StringParameter(
+                                    EUROSTATConstants.LOGO_URL_KEY,
+                                    getName(),
+                                    EUROSTATConstants.LOGO_URL_DEFAULT_VALUE,
+                                    stringMappingFunction));
 
         this.publisherParam = Configuration.registerParameter(
-                new StringParameter(
-                    EUROSTATConstants.PUBLISHER_KEY,
-                    getName(),
-                    EUROSTATConstants.PUBLISHER_DEFAULT_VALUE,
-                    stringMappingFunction));
+                                  new StringParameter(
+                                      EUROSTATConstants.PUBLISHER_KEY,
+                                      getName(),
+                                      EUROSTATConstants.PUBLISHER_DEFAULT_VALUE,
+                                      stringMappingFunction));
 
         this.languageParam = Configuration.registerParameter(
-                new StringParameter(
-                    EUROSTATConstants.LANGUAGE_KEY,
-                    getName(),
-                    EUROSTATConstants.LANGUAGE_DEFAULT_VALUE,
-                    stringMappingFunction));
+                                 new StringParameter(
+                                     EUROSTATConstants.LANGUAGE_KEY,
+                                     getName(),
+                                     EUROSTATConstants.LANGUAGE_DEFAULT_VALUE,
+                                     stringMappingFunction));
 
         this.formatParam = Configuration.registerParameter(
-                new StringParameter(
-                    EUROSTATConstants.FORMAT_KEY,
-                    getName(),
-                    EUROSTATConstants.FORMAT_DEFAULT_VALUE,
-                    stringMappingFunction));
+                               new StringParameter(
+                                   EUROSTATConstants.FORMAT_KEY,
+                                   getName(),
+                                   EUROSTATConstants.FORMAT_DEFAULT_VALUE,
+                                   stringMappingFunction));
 
         this.rightsNameParam = Configuration.registerParameter(
-                new StringParameter(
-                    EUROSTATConstants.RIGHTS_NAME_KEY,
-                    getName(),
-                    EUROSTATConstants.RIGHTS_NAME_DEFAULT_VALUE,
-                    stringMappingFunction));
+                                   new StringParameter(
+                                       EUROSTATConstants.RIGHTS_NAME_KEY,
+                                       getName(),
+                                       EUROSTATConstants.RIGHTS_NAME_DEFAULT_VALUE,
+                                       stringMappingFunction));
 
         this.rightsUriParam = Configuration.registerParameter(
-                new StringParameter(
-                    EUROSTATConstants.RIGHTS_URI_KEY,
-                    getName(),
-                    EUROSTATConstants.RIGHTS_URI_DEFAULT_VALUE,
-                    stringMappingFunction));
+                                  new StringParameter(
+                                      EUROSTATConstants.RIGHTS_URI_KEY,
+                                      getName(),
+                                      EUROSTATConstants.RIGHTS_URI_DEFAULT_VALUE,
+                                      stringMappingFunction));
     }
 
     /**
@@ -134,7 +134,7 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
             return new URL(this.sdemUrlParam.getValue());
         } catch (MalformedURLException e) {
             throw new IllegalStateException(EUROSTATConstants.MALFORMED_SDEM_URL_ERROR);
-        } 
+        }
     }
 
     /**

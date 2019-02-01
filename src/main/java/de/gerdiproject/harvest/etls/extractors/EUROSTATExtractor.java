@@ -23,8 +23,6 @@ import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EUROSTATETL;
-import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
-import de.gerdiproject.harvest.utils.data.HttpRequester;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
@@ -43,11 +41,11 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<EUROSTATVO>
         super.init(etl);
 
         final EUROSTATETL eurostatEtl = (EUROSTATETL) etl;
-        final StructureParsingManagerImpl structureParsingManagerImpl 
+        final StructureParsingManagerImpl structureParsingManagerImpl
             = new StructureParsingManagerImpl();
         final StructureWorkspace structureWorkspace
             = structureParsingManagerImpl.parseStructures(
-                new ReadableDataLocationTmp(eurostatEtl.getSdemUrl()));
+                  new ReadableDataLocationTmp(eurostatEtl.getSdemUrl()));
 
 
 

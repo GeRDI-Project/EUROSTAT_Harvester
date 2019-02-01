@@ -27,11 +27,13 @@ import de.gerdiproject.json.datacite.DataCiteJson;
  */
 public class EUROSTATTransformer extends AbstractIteratorTransformer<EUROSTATVO, DataCiteJson>
 {
-    @Override
-    public void init(AbstractETL<?, ?> etl)
-    {
-        super.init(etl);
-    }
+    /*
+        @Override
+        public void init(AbstractETL<?, ?> etl)
+        {
+            super.init(etl);
+        }
+    */
 
 
     @Override
