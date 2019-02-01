@@ -77,7 +77,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<CrossReferenceB
      *
      * @author Tobias Weber
      */
-    private class EUROSTATIterator implements Iterator<CrossReferenceBean>
+    private static class EUROSTATIterator implements Iterator<CrossReferenceBean>
     {
         private Queue<DataflowBean> dataflows = new LinkedList<>();
 
