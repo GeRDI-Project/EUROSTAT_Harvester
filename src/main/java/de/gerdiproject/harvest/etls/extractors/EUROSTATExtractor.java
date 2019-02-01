@@ -16,9 +16,14 @@
 package de.gerdiproject.harvest.etls.extractors;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
-import org.sdmxsource.sdmx.structureparser.manager.parsing.impl.StructureParsingManagerImpl;
 import org.sdmxsource.sdmx.api.model.StructureWorkspace;
+import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
+import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
+import org.sdmxsource.sdmx.structureparser.manager.parsing.impl.StructureParsingManagerImpl;
 import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
@@ -26,14 +31,16 @@ import de.gerdiproject.harvest.etls.EUROSTATETL;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
- * (meta-)data from EUROSTAT and bundles it into a {@linkplain EUROSTATVO}.
+ * (meta-)data from EUROSTAT and bundles it into a {@linkplain CrossReferenceBean}.
  *
  * @author Tobias Weber
  */
-public class EUROSTATExtractor extends AbstractIteratorExtractor<EUROSTATVO>
+public class EUROSTATExtractor extends AbstractIteratorExtractor<CrossReferenceBean>
 {
     private String version = null;
     private int size = -1;
+    private StructureParsingManagerImpl parser = new StructureParsingManagerImpl();
+    private StructureWorkspace sdem = null;
 
     @Override
     public void init(AbstractETL<?, ?> etl)
@@ -41,19 +48,10 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<EUROSTATVO>
         super.init(etl);
 
         final EUROSTATETL eurostatEtl = (EUROSTATETL) etl;
-        final StructureParsingManagerImpl structureParsingManagerImpl
-            = new StructureParsingManagerImpl();
-        final StructureWorkspace structureWorkspace
-            = structureParsingManagerImpl.parseStructures(
-                  new ReadableDataLocationTmp(eurostatEtl.getSdemUrl()));
-
-
-
-        // TODO if possible, extract some metadata in order to determine the size and a version string
-        // this.version = ;
-        // this.size = ;
+        sdem = parser.parseStructures(new ReadableDataLocationTmp(eurostatEtl.getSdemUrl()));
+        size = sdem.getStructureBeans(false).getDataflows().size();
+        version = sdem.getStructureBeans(false).getHeader().getId();
     }
-
 
     @Override
     public String getUniqueVersionString()
@@ -61,43 +59,50 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<EUROSTATVO>
         return version;
     }
 
-
-
     @Override
     public int size()
     {
         return size;
     }
 
-
-
     @Override
-    protected Iterator<EUROSTATVO> extractAll() throws ExtractorException
+    protected Iterator<CrossReferenceBean> extractAll() throws ExtractorException
     {
-        return new EUROSTATIterator();
+        return new EUROSTATIterator(this.sdem.getStructureBeans(false).getDataflows());
     }
 
-
     /**
-     * TODO add a description here
+     * This iterator iterates over all dataflows in the sdem and retrieves the
+     * data structure message
      *
      * @author Tobias Weber
      */
-    private class EUROSTATIterator implements Iterator<EUROSTATVO>
+    private class EUROSTATIterator implements Iterator<CrossReferenceBean>
     {
+        private Queue<DataflowBean> dataflows = new LinkedList<>();
+
+        /**
+         * Adds a set of DataflowBeans to the harvest queue
+         *
+         * @param dataflows set of DataflowBeans to be added to the queue
+         */
+        public EUROSTATIterator(Set<DataflowBean> dataflows)
+
+        {
+            dataflows.addAll(dataflows);
+        }
+
         @Override
         public boolean hasNext()
         {
-            // TODO
-            return false;
+            return !dataflows.isEmpty();
         }
 
-
         @Override
-        public EUROSTATVO next()
+        public CrossReferenceBean next()
         {
-            // TODO
-            return null;
+            final DataflowBean dataflowBean = dataflows.remove();
+            return dataflowBean.getDataStructureRef();
         }
     }
 }

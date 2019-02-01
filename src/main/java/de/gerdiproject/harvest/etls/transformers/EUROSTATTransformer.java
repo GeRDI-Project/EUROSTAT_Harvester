@@ -15,17 +15,18 @@
  */
 package de.gerdiproject.harvest.etls.transformers;
 
-import de.gerdiproject.harvest.etls.AbstractETL;
-import de.gerdiproject.harvest.etls.extractors.EUROSTATVO;
+import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
+
+//import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.json.datacite.DataCiteJson;
 
 /**
- * This transformer parses metadata from a {@linkplain EUROSTATVO}
+ * This transformer parses metadata from a {@linkplain CrossReferenceBean}
  * and creates {@linkplain DataCiteJson} objects from it.
  *
  * @author Tobias Weber
  */
-public class EUROSTATTransformer extends AbstractIteratorTransformer<EUROSTATVO, DataCiteJson>
+public class EUROSTATTransformer extends AbstractIteratorTransformer<CrossReferenceBean, DataCiteJson>
 {
     /*
         @Override
@@ -37,7 +38,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<EUROSTATVO,
 
 
     @Override
-    protected DataCiteJson transformElement(EUROSTATVO source)
+    protected DataCiteJson transformElement(CrossReferenceBean source)
     {
         // create the document
         final DataCiteJson document = new DataCiteJson(createIdentifier(source));
@@ -55,7 +56,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<EUROSTATVO,
      *
      * @return a unique identifier of this document
      */
-    private String createIdentifier(EUROSTATVO source)
+    private String createIdentifier(CrossReferenceBean source)
     {
         // TODO retrieve a unique identifier from the source
         return source.toString();

@@ -19,6 +19,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.function.Function;
 
+import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
+
 import de.gerdiproject.harvest.config.Configuration;
 import de.gerdiproject.harvest.config.parameters.StringParameter;
 import de.gerdiproject.harvest.config.parameters.constants.ParameterMappingFunctions;
@@ -34,7 +36,7 @@ import de.gerdiproject.json.datacite.DataCiteJson;
  *
  * @author Tobias Weber
  */
-public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
+public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJson>
 {
     // URLs
     private StringParameter sdemUrlParam;
