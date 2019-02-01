@@ -26,7 +26,6 @@ import de.gerdiproject.harvest.config.parameters.StringParameter;
 import de.gerdiproject.harvest.config.parameters.constants.ParameterMappingFunctions;
 import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
 import de.gerdiproject.harvest.etls.extractors.EUROSTATExtractor;
-import de.gerdiproject.harvest.etls.extractors.EUROSTATVO;
 import de.gerdiproject.harvest.etls.transformers.EUROSTATTransformer;
 import de.gerdiproject.json.datacite.DataCiteJson;
 
