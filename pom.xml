@@ -15,6 +15,10 @@
 	<description>This is a restful harvester for retrieving data from https://ec.europa.eu/eurostat</description>
 	<inceptionYear>2019</inceptionYear>
   
+    <properties>
+        <sdmxsource.version>1.5.6.2</sdmxsource.version>
+    </properties>
+
 	<developers>
 		<developer>
 			<name>Tobias Weber</name>
@@ -24,11 +28,23 @@
 		</developer>
 	</developers>
 	
+	<dependencies>		
+        <dependency>
+            <groupId>org.sdmxsource</groupId>
+            <artifactId>SdmxStructureParser</artifactId>
+            <version>${sdmxsource.version}</version>
+        </dependency>
+	</dependencies>
+
 	<!-- Define Sonatype repository for retrieving SNAPSHOT versions -->
 	<repositories>
 		<repository>
 			<id>Sonatype</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
+        <repository>
+            <id>MTRepo</id>
+            <url>http://sdmxsource.metadatatechnology.com/nexus/content/repositories/releases</url>
+        </repository>
 	</repositories>
 </project>

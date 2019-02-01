@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
  * @author Tobias Weber
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class OaiPmhConstants
+public class EUROSTATConstants
 {
     // URLs
     // Structural Data Exchange Message (SDEM)
@@ -50,6 +50,8 @@ public class OaiPmhConstants
     // Errors
     public static final String CANNOT_HARVEST = "Cannot harvest: ";
     public static final String CANNOT_CREATE_TRANSFORMER = "Cannot create transformer!"; 
-    public static final String NO_HOST_URL_ERROR = "You must set the '" + EUROSTATConstants.SDEM_URL_KEY + "'-parameter in the config!";
+    public static final String MALFORMED_SDEM_URL_ERROR = "You must correctly set the '" 
+        + EUROSTATConstants.SDEM_URL_KEY 
+        + "'-parameter in the config!";
     public static final String NO_RECORDS_ERROR = "The URL '%s' did not yield any harvestable records! Change the parameters in the config!";
 }

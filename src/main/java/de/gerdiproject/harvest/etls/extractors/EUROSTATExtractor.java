@@ -17,7 +17,13 @@ package de.gerdiproject.harvest.etls.extractors;
 
 import java.util.Iterator;
 
+import org.sdmxsource.sdmx.structureparser.manager.parsing.impl.StructureParsingManagerImpl;
+import org.sdmxsource.sdmx.api.model.StructureWorkspace;
+import org.sdmxsource.util.io.ReadableDataLocationTmp;
+
 import de.gerdiproject.harvest.etls.AbstractETL;
+import de.gerdiproject.harvest.etls.EUROSTATETL;
+import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
 import de.gerdiproject.harvest.utils.data.HttpRequester;
 
 /**
@@ -28,30 +34,24 @@ import de.gerdiproject.harvest.utils.data.HttpRequester;
  */
 public class EUROSTATExtractor extends AbstractIteratorExtractor<EUROSTATVO>
 {
-    private final HttpRequester httpRequester;
-
     private String version = null;
     private int size = -1;
-
-
-    /**
-     * Simple constructor.
-     */
-    public EUROSTATExtractor()
-    {
-        this.httpRequester = new HttpRequester();
-    }
-
 
     @Override
     public void init(AbstractETL<?, ?> etl)
     {
         super.init(etl);
 
-        this.httpRequester.setCharset(etl.getCharset());
+        final EUROSTATETL eurostatEtl = (EUROSTATETL) etl;
+        final StructureParsingManagerImpl structureParsingManagerImpl 
+            = new StructureParsingManagerImpl();
+        final StructureWorkspace structureWorkspace
+            = structureParsingManagerImpl.parseStructures(
+                new ReadableDataLocationTmp(eurostatEtl.getSdemUrl()));
+
+
 
         // TODO if possible, extract some metadata in order to determine the size and a version string
-        // final EUROSTATETL specificEtl = (EUROSTATETL) etl;
         // this.version = ;
         // this.size = ;
     }

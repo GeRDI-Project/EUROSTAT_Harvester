@@ -15,11 +15,18 @@
  */
 package de.gerdiproject.harvest.etls;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.function.Function;
+
+import de.gerdiproject.harvest.config.Configuration;
+import de.gerdiproject.harvest.config.parameters.StringParameter;
+import de.gerdiproject.harvest.config.parameters.constants.ParameterMappingFunctions;
+import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
 import de.gerdiproject.harvest.etls.extractors.EUROSTATExtractor;
 import de.gerdiproject.harvest.etls.extractors.EUROSTATVO;
 import de.gerdiproject.harvest.etls.transformers.EUROSTATTransformer;
 import de.gerdiproject.json.datacite.DataCiteJson;
-
 
 /**
  * An ETL for harvesting EUROSTAT.<br>
@@ -67,51 +74,51 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
         // Structural Definition Exchange Message (SDEM)
         this.sdemUrlParam = Configuration.registerParameter(
                 new StringParameter(
-                    EUROSTATParameterConstants.SDEM_URL_KEY,
+                    EUROSTATConstants.SDEM_URL_KEY,
                     getName(),
-                    EUROSTATParameterConstants.SDEM_URL_DEFAULT_VALUE,
+                    EUROSTATConstants.SDEM_URL_DEFAULT_VALUE,
                     urlMappingFunction));
 
         this.logoUrlParam = Configuration.registerParameter(
                 new StringParameter(
-                    EUROSTATParameterConstants.LOGO_URL_KEY,
+                    EUROSTATConstants.LOGO_URL_KEY,
                     getName(),
-                    EUROSTATParameterConstants.LOGO_URL_DEFAULT_VALUE,
+                    EUROSTATConstants.LOGO_URL_DEFAULT_VALUE,
                     stringMappingFunction));
 
         this.publisherParam = Configuration.registerParameter(
                 new StringParameter(
-                    EUROSTATParameterConstants.PUBLISHER_KEY,
+                    EUROSTATConstants.PUBLISHER_KEY,
                     getName(),
-                    EUROSTATParameterConstants.PUBLISHER_DEFAULT_VALUE,
+                    EUROSTATConstants.PUBLISHER_DEFAULT_VALUE,
                     stringMappingFunction));
 
         this.languageParam = Configuration.registerParameter(
                 new StringParameter(
-                    EUROSTATParameterConstants.LANGUAGE_KEY,
+                    EUROSTATConstants.LANGUAGE_KEY,
                     getName(),
-                    EUROSTATParameterConstants.LANGUAGE_DEFAULT_VALUE,
+                    EUROSTATConstants.LANGUAGE_DEFAULT_VALUE,
                     stringMappingFunction));
 
         this.formatParam = Configuration.registerParameter(
                 new StringParameter(
-                    EUROSTATParameterConstants.FORMAT_KEY,
+                    EUROSTATConstants.FORMAT_KEY,
                     getName(),
-                    EUROSTATParameterConstants.FORMAT_DEFAULT_VALUE,
+                    EUROSTATConstants.FORMAT_DEFAULT_VALUE,
                     stringMappingFunction));
 
         this.rightsNameParam = Configuration.registerParameter(
                 new StringParameter(
-                    EUROSTATParameterConstants.RIGHTS_NAME_KEY,
+                    EUROSTATConstants.RIGHTS_NAME_KEY,
                     getName(),
-                    EUROSTATParameterConstants.RIGHTS_NAME_DEFAULT_VALUE,
+                    EUROSTATConstants.RIGHTS_NAME_DEFAULT_VALUE,
                     stringMappingFunction));
 
         this.rightsUriParam = Configuration.registerParameter(
                 new StringParameter(
-                    EUROSTATParameterConstants.RIGHTS_URI_KEY,
+                    EUROSTATConstants.RIGHTS_URI_KEY,
                     getName(),
-                    EUROSTATParameterConstants.RIGHTS_URI_DEFAULT_VALUE,
+                    EUROSTATConstants.RIGHTS_URI_DEFAULT_VALUE,
                     stringMappingFunction));
     }
 
@@ -121,20 +128,24 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
      *
      * @return a SDEM URL, e.g. http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest
      */
-    public String getSdemUrl()
+    public URL getSdemUrl() throws IllegalStateException
     {
-        return this.sdemUrl;
+        try {
+            return new URL(this.sdemUrlParam.getValue());
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(EUROSTATConstants.MALFORMED_SDEM_URL_ERROR);
+        } 
     }
 
     /**
      * Getter for the URL that should point to the repository provider logo.
      * The URL is directly retrieved from the corresponding parameter.
      *
-     * @return a SDEM URL, e.g. http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest
+     * @return a Logo URL, e.g. http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest
      */
-    public String getSdemUrl()
+    public String getLogoUrl()
     {
-        return this.sdemUrl;
+        return this.logoUrlParam.getValue();
     }
 
     /**
@@ -146,7 +157,7 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
      */
     public String getPublisher()
     {
-        return this.publisherParam;
+        return this.publisherParam.getValue();
     }
 
     /**
@@ -158,7 +169,7 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
      */
     public String getLanguage()
     {
-        return this.languageParam;
+        return this.languageParam.getValue();
     }
 
     /**
@@ -170,7 +181,7 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
      */
     public String getFormat()
     {
-        return this.formatParam;
+        return this.formatParam.getValue();
     }
 
     /**
@@ -182,7 +193,7 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
      */
     public String getRightsName()
     {
-        return this.rightsNameParam;
+        return this.rightsNameParam.getValue();
     }
 
     /**
@@ -194,7 +205,7 @@ public class EUROSTATETL extends StaticIteratorETL<EUROSTATVO, DataCiteJson>
      */
     public String getRightsUri()
     {
-        return this.rightsUriParam;
+        return this.rightsUriParam.getValue();
     }
 
     // TODO 1. Check if StaticIteratorETL really suits your needs, or exchange it with any other AbstractETL.
