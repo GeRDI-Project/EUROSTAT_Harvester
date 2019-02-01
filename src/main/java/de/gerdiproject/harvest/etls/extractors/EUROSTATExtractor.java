@@ -20,22 +20,25 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import org.sdmxsource.sdmx.api.constants.SDMX_STRUCTURE_TYPE;
 import org.sdmxsource.sdmx.api.model.StructureWorkspace;
+import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
-import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
+import org.sdmxsource.sdmx.api.model.beans.reference.StructureReferenceBean;
 import org.sdmxsource.sdmx.structureparser.manager.parsing.impl.StructureParsingManagerImpl;
 import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EUROSTATETL;
+import de.gerdiproject.harvest.etls.sdmx.DataStructure;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
- * (meta-)data from EUROSTAT and bundles it into a {@linkplain CrossReferenceBean}.
+ * (meta-)data from EUROSTAT and bundles it into a {@linkplain DataStructure}.
  *
  * @author Tobias Weber
  */
-public class EUROSTATExtractor extends AbstractIteratorExtractor<CrossReferenceBean>
+public class EUROSTATExtractor extends AbstractIteratorExtractor<DataStructure>
 {
     private String version = null;
     private int size = -1;
@@ -66,7 +69,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<CrossReferenceB
     }
 
     @Override
-    protected Iterator<CrossReferenceBean> extractAll() throws ExtractorException
+    protected Iterator<DataStructure> extractAll() throws ExtractorException
     {
         return new EUROSTATIterator(this.sdem.getStructureBeans(false).getDataflows());
     }
@@ -77,7 +80,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<CrossReferenceB
      *
      * @author Tobias Weber
      */
-    private static class EUROSTATIterator implements Iterator<CrossReferenceBean>
+    private static class EUROSTATIterator implements Iterator<DataStructure>
     {
         private Queue<DataflowBean> dataflows = new LinkedList<>();
 
@@ -99,10 +102,19 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<CrossReferenceB
         }
 
         @Override
-        public CrossReferenceBean next()
+        public DataStructure next()
         {
             final DataflowBean dataflowBean = dataflows.remove();
-            return dataflowBean.getDataStructureRef();
+            StructureReferenceBean structureReferenceBean 
+                = dataflowBean.getDataStructureRef().getMutableInstance();
+            if (structureReferenceBean.getMaintainableStructureType() 
+                    == SDMX_STRUCTURE_TYPE.DATASTRUCTURE) {
+                return new DataStructure(
+                        dataflowBean.getName(),
+                        (DataStructureBean) structureReferenceBean.getTargetReference());
+           } else {
+               return next();
+           }
         }
     }
 }

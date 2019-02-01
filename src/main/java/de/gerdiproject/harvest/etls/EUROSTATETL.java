@@ -28,6 +28,8 @@ import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
 import de.gerdiproject.harvest.etls.extractors.EUROSTATExtractor;
 import de.gerdiproject.harvest.etls.transformers.EUROSTATTransformer;
 import de.gerdiproject.json.datacite.DataCiteJson;
+import de.gerdiproject.json.datacite.Rights;
+import de.gerdiproject.json.datacite.Formats;
 
 /**
  * An ETL for harvesting EUROSTAT.<br>
@@ -174,41 +176,33 @@ public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJ
     }
 
     /**
-     * Getter for the default DataCite format value
-     * The value is directly retrieved from the corresponding parameter
+     * Getter for the default DataCite formats 
+     * The (only) value is directly retrieved from the corresponding parameter
      * or from the default value.
      *
-     * @return the format value
+     * @return the formats value
      */
-    public String getFormat()
+    public Set<String> getFormats()
     {
-        return this.formatParam.getValue();
+        formats = new HashSet<String>();
+        formats.add(this.formatParam.getValue());
+        return formats;
     }
 
     /**
-     * Getter for the default DataCite rightsName value
-     * The value is directly retrieved from the corresponding parameter
-     * or from the default value.
+     * Getter for the default rightsList
      *
-     * @return the name of the data license
+     * @return a DataCiteJson representation of the rightsList
      */
-    public String getRightsName()
+    public Set<Rights> getRightsList()
     {
-        return this.rightsNameParam.getValue();
-    }
+        rightsList = new HashSet<Rights>();
+        rightsList.add(new Rights(
+                    this.rightsNameParam.getValue()
+                    getRightsName(),
+                    "en-US",
+                    this.rightsUriParam.getValue()));
 
-    /**
-     * Getter for the default DataCite rightsUri value
-     * The value is directly retrieved from the corresponding parameter
-     * or from the default value.
-     *
-     * @return the uri of the data license
-     */
-    public String getRightsUri()
-    {
-        return this.rightsUriParam.getValue();
+        return rightsList;
     }
-
-    // TODO 1. Check if StaticIteratorETL really suits your needs, or exchange it with any other AbstractETL.
-    // TODO 2. Exchange EUROSTATVO with whatever is extracted from your DataProvider or populate it with fitting data.
 }
