@@ -36,7 +36,7 @@
 | 13 | Size                     | blank |
 | 14 | Format                   | configurable: "application/json" |
 | 15 | Version                  | blank |
-| 16 | Rights                   | configurable: "Eurostat License" with rightsUri set to "https | //ec.europa.eu/eurostat/about/policies/copyright" (configurable) |
+| 16 | Rights                   | configurable: "Eurostat License" with rightsUri set to "https://ec.europa.eu/eurostat/about/policies/copyright" (configurable) |
 | 17 | Description              | Automatic compiled text from descriptions of data flows, dimensions and Codelist |
 | 18 | GeoLocation              | CL_GEO if set, blank otherwise |
 | 19 | FundingReference         | blank |
