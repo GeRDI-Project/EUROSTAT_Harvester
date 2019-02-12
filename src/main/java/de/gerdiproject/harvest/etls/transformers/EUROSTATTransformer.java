@@ -16,6 +16,11 @@
 package de.gerdiproject.harvest.etls.transformers;
 
 import java.util.Calendar;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 
@@ -31,23 +36,26 @@ import de.gerdiproject.json.datacite.DataCiteJson;
  */
 public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructure, LinkedList<DataCiteJson>>
 {
+    private EUROSTAT eurostatETL;
 
     @Override
     public void init(AbstractETL<?, ?> etl)
     {
         super.init(etl);
+        eurostatETL = (EUROSTATETL) etl;
     }
 
     @Override
     protected LinkedList<DataCiteJson> transformElement(DataStructure source)
     {
         LinkedList<DataCiteJson> records = new LinkedList<DataCiteJson>();
-       
-        LinkedList<HashMap<String, String>> dimensionSelections = getDimensionSelections(); 
 
-        for(HashMap<String,String> dimensionSelection: dimenstionSelections)
-        { 
-            records.add(getDocument(source, dimensionSelectionl));
+        LinkedList<HashMap<String, CodeBean>> dimensionCombinations 
+            = getDimensionCombinations(source);
+
+        for(HashMap<String,CodeBean> dimensionCombination: dimenstionCombinations)
+        {
+            records.add(getDocument(source, dimensionCombination));
         }
         return records;
     }
@@ -57,21 +65,118 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
      *
      * @param the DataStructure in question
      *
-     * @return a list containing a hash with names of present dimensions as keys and their code as value.
+     * @return a list of all possible combinations of codes of each allowed and present dimension
      */
-    private List<Map<String, String>> getDimensionSelections(DataStructure source)
+    private List<Map<String, CodeBean>> getDimensionCombinations(DataStructure source)
     {
-        List<String> dimensionNames = new LinkedList<String>();
+        List<String> dimensionIds = new LinkedList<String>();
 
-        for(DimensionBean db : source.getDataStructureBean.getDimensions())
+        // get all dimensions that are allowed AND existent in source
+        for(DimensionBean dimensionBean : source.getDataStructureBean.getDimensions())
         {
-            if(getAllowedDimensionNames().contains(db.getId()) {
-                dimensionNames.add(db.getId());
+            if(getAllowedDimensionNames().contains(dimensionBean.getId()) {
+                dimensionId.add(dimensionBean.getId());
             }
         }
-        //iterate over all dimensions CONTINUE HERE
 
+        //Convert dimensions to a List.
+        HashMap<String, List<CodeBean>> input = new HashMap<String, List<CodeBean>>();
+        for(String dimensionId : dimensionIds) {
+            input.put(dimensionId, getCodeList(source, dimensionId));
+        }
+        //Build a list of all possible combination of values of each dimension.
+        return (0, input, new HashMap<String, CodeBean>(), new LinkedList<Map<String, CodeBean>());
     }
+
+    /**
+     * Get a list of all Codes given a dimensionId
+     *
+     * @param source the DataStructure to be searched
+     * @param dimensionId the ID of the dimension to be iterated over
+     *
+     * @return A list of all code values for the dimension in source
+     */
+    private List<CodeBean> getCodeList(DataStructure source, String dimensionId)
+    {
+        LinkedList<String> codes = new LinkedList<String>();
+
+        DimensionBean dimensionBean = source.getDataStructureBean().getDimension(dimensionId);
+        ConceptBean conceptBean = (ConcepBean) dimensionBean.getConceptRole().getTargetReference();
+        CodeListBean codeListBean
+            = (CodeListBean) conceptBean.getCoreRepresentation().getRepresentation().getTargetReference();
+
+        for(SDMXBean code : codeListBean) {
+            codes.add((CodeBean) code);
+        }
+    }
+
+    /**
+     * This function transforms a map of n sets of Strings with arbitrary lengths
+     * to a set of maps with n key/value pairs, comprising all possible combinations
+     * of the elements of the input maps.
+     *
+     * Example:
+     * Input: { "article":  ["a", "the"],
+     *          "adjective: ["fat"],
+     *          "noun": ["cop", "god", "cod"] }
+     * Output: [
+     *          { "article" : "a",   "adjective" : "fat", "noun" : "cop" },
+     *          { "article" : "a",   "adjective" : "fat", "noun" : "god" },
+     *          { "article" : "a",   "adjective" : "fat", "noun" : "cod" },
+     *          { "article" : "the", "adjective" : "fat", "noun" : "cop" },
+     *          { "article" : "the", "adjective" : "fat", "noun" : "god" },
+     *          { "article" : "the", "adjective" : "fat", "noun" : "cod" },
+     *
+     * We use recursion to traverse to each leaf of this tree
+     *
+     *                  |
+     *         ------------------
+     *        "a"              "the"
+     *         |                 |
+     *       "fat"             "fat"
+     *         |                 |
+     *   -------------     -------------
+     *   |     |     |     |     |     |
+     * "cop" "god" "cod" "cop" "god" "cod"
+     *
+     * Idea for this implementation:
+     * https://stackoverflow.com/questions/8173862/map-of-sets-into-list-of-all-combinations
+     *
+     * @param level tracks the current level in the tree or number of recursions happened.
+     * @param input Map with the Sets to be combined
+     * @param currentRow the current combination that is assembled
+     * @param output intermediate list of combinations to be calculated (manage state among recursions)
+     *
+     * @return list of combinations of the element of the input maps
+     */
+
+    private static List<Map <String, CodeBean>> combineDimensions(
+        int level,
+        Map<String, List <CodeBean>> input,
+        Map<String, CodeBean> currentRow,
+        List<Map <String, CodeBean>> output )
+    {
+        if(level == input.size()) {//all dimensions were visited -> we have reached a leaf
+            // deep copy of current, because Java sucks at doing this natively
+            Map<String, CodeBean> newMap = new HashMap<String, CodeBean>();
+            for(String key: currentRow.keySet()) {
+                    newMap.put(key, currentRow.get(key));
+            }
+            output.add(newMap);
+            return output;
+        } else { //we have not visited a leaf, so we need to iterate over all values of this level
+            String dimension = (String) input.keySet().toArray()[level];
+            for(CodeBean codeBean: input.get(dimension)) {
+                currentRow.put(dimension, codeBean);
+                output = combineDimensions(level + 1, input, currentRow, output);
+                // After a leaf was visited we remove the key
+                // (otherwise the current key/value-pair would be part of all rows added to the output).
+                currentRow.remove(dimension);
+            }
+        }
+        return output;
+    }
+
 
     /**
      * A list of dimensions that are supported
@@ -89,19 +194,37 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         };
     }
 
-    private DataCiteJson getDocument(DataStructure source, 
-            Hash<String, String> dimensionSelection)
+    private DataCiteJson getDocument(DataStructure source,
+            Hash<String, CodeBean> dimensionSelection)
     {
-        Identifier identifier = new Identifier(getIdentifier(source, dimensionSelection)); 
-        DataCiteJson document = createDataCiteStub(identifier); 
+        Identifier identifier = new Identifier(getIdentifier(source, dimensionSelection));
+        DataCiteJson document = createDataCiteStub(identifier);
+
         document.addTitles(getTitle(source, dimenstionSelection));
+        document.setPublisher(etl.getPublisher());
         document.addSubjects(getSubjects(source, dimensionSelection));
+        document.setLanguage(etl.getLanguage());
+        document.addFormats(etl.getFormats());
+        document.addRights(etl.getRightsList());
         document.addDescriptions(getDescription(source, dimensionSelection));
         if (hasGeoDimension(source)) {
             documentaddGeoLocations(getGeoLocations(source));
         }
         document.setResearchDataList(getResearchDataList(source), identifier);
+    }
 
+    /**
+     * Creates a title from the name of the DataStructure and all dimensionCodes
+     *
+     * @param source DataStructure
+     * @param dimensionSelection hash (dimensionName -> codeValue)
+     *
+     * @return Collection with one title
+     */
+    private Collection<Title> getTitle(DataStructure source,
+            Hash<String, CodeBean> dimensionSelection)
+    {
+        
     }
 
     /**
@@ -114,7 +237,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
      */
     private DataCiteJson createDataCiteStub(Identifier identifier)
     {
-        DataCiteJson document = new DataCiteJson(identifier); 
+        DataCiteJson document = new DataCiteJson(identifier);
 
         document.setPublisher(etl.getPublisher());
         document.setPublicationYear(
@@ -126,20 +249,5 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         document.setRightsList(etl.getRightsList());
 
         return document;
-    }
-
-
-
-    /**
-     * Creates a unique identifier for a document from EUROSTAT.
-     *
-     * @param source the source object that contains all metadata that is needed
-     *
-     * @return a unique identifier of this document
-     */
-    private String createIdentifier(DataStructureBean source)
-    {
-        // TODO retrieve a unique identifier from the source
-        return source.toString();
     }
 }
