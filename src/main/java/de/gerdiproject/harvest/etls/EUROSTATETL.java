@@ -17,6 +17,7 @@ package de.gerdiproject.harvest.etls;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
@@ -29,7 +30,6 @@ import de.gerdiproject.harvest.etls.extractors.EUROSTATExtractor;
 import de.gerdiproject.harvest.etls.transformers.EUROSTATTransformer;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Rights;
-import de.gerdiproject.json.datacite.Formats;
 
 /**
  * An ETL for harvesting EUROSTAT.<br>
@@ -48,7 +48,7 @@ public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJ
     private StringParameter formatParam;
     private StringParameter rightsNameParam;
     private StringParameter rightsUriParam;
-
+    private StringParameter restBaseUrlParam;
 
     /**
      * Constructor
@@ -123,6 +123,13 @@ public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJ
                                       getName(),
                                       EUROSTATConstants.RIGHTS_URI_DEFAULT_VALUE,
                                       stringMappingFunction));
+
+        this.restBaseUrlParam = Configuration.registerParameter(
+                                    new StringParameter(
+                                        EUROSTATConstants.REST_URL_BASE_KEY,
+                                        getName(),
+                                        EUROSTATConstants.REST_URL_BASE_DEFAULT_VALUE,
+                                        urlMappingFunction));
     }
 
     /**
@@ -176,7 +183,7 @@ public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJ
     }
 
     /**
-     * Getter for the default DataCite formats 
+     * Getter for the default DataCite formats
      * The (only) value is directly retrieved from the corresponding parameter
      * or from the default value.
      *
@@ -198,11 +205,21 @@ public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJ
     {
         rightsList = new HashSet<Rights>();
         rightsList.add(new Rights(
-                    this.rightsNameParam.getValue()
-                    getRightsName(),
-                    "en-US",
-                    this.rightsUriParam.getValue()));
+                           this.rightsNameParam.getValue(),
+                           getRightsName(),
+                           "en-US",
+                           this.rightsUriParam.getValue()));
 
         return rightsList;
+    }
+
+    /**
+     * Getter for the rest base URL (configurable)
+     *
+     * @return the URL as a String
+     */
+    public String getRestBaseUrl()
+    {
+        return this.restBaseUrlParam.getValue();
     }
 }

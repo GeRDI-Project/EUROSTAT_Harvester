@@ -15,14 +15,17 @@
  */
 package de.gerdiproject.harvest.etls.sdmx;
 
+import java.util.List;
+import java.util.Set;
+
 import org.sdmxsource.sdmx.api.model.beans.base.TextTypeWrapper;
-import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean; 
+import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 
 /**
  * This {@linkplain DataStructure} is a container for a SDMX dataflow with
  * exactly one referenced SDMX data structure.
  * It is a composite of a List of names for the dataflow in different locales
- * and a {@linkplain DataStructureBean} 
+ * and a {@linkplain DataStructureBean}
  *
  * @author Tobias Weber
  */
@@ -38,7 +41,7 @@ public class DataStructure
      * @param DataStructureBean DataStructureBean with dimensions and codelists.
      */
     public DataStructure(List<TextTypeWrapper> names,
-            DataStructureBean dataStructureBean)
+                         DataStructureBean dataStructureBean)
     {
         this.names = names;
         this.dataStructureBean = dataStructureBean;
@@ -47,7 +50,7 @@ public class DataStructure
     /**
      * Getter for the DataStructureBean
      *
-     * @return The DataStructureBean 
+     * @return The DataStructureBean
      */
     public DataStructureBean getDataStructureBean()
     {
@@ -62,10 +65,10 @@ public class DataStructure
     public String getEnglishOrFirstName()
     {
         for (TextTypeWrapper text : this.names) {
-            if (text.getLocale == "en") {
+            if (text.getLocale == "en")
                 return text.getValue();
-            }
         }
+
         return this.names.get(0);
     }
 }

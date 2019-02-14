@@ -16,6 +16,7 @@
 package de.gerdiproject.harvest.etls.transformers;
 
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +24,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
+import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
+import de.gerdiproject.harvest.etls.EUROSTATETL;
 import de.gerdiproject.harvest.etls.sdmx.DataStructure;
 import de.gerdiproject.json.datacite.DataCiteJson;
+import de.gerdiproject.json.datacite.Description;
+import de.gerdiproject.json.datacite.GeoLocation;
+import de.gerdiproject.json.datacite.Identifier;
+import de.gerdiproject.json.datacite.Subject;
+import de.gerdiproject.json.datacite.Title;
+import de.gerdiproject.json.datacite.extension.generic.ResearchData;
 
 /**
  * This transformer parses metadata from a {@linkplain DataStructureBean}
@@ -36,7 +45,7 @@ import de.gerdiproject.json.datacite.DataCiteJson;
  */
 public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructure, LinkedList<DataCiteJson>>
 {
-    private EUROSTAT eurostatETL;
+    private EUROSTATETL eurostatETL;
 
     @Override
     public void init(AbstractETL<?, ?> etl)
@@ -50,13 +59,12 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
     {
         LinkedList<DataCiteJson> records = new LinkedList<DataCiteJson>();
 
-        LinkedList<HashMap<String, CodeBean>> dimensionCombinations 
+        LinkedList<HashMap<String, CodeBean>> dimensionCombinations
             = getDimensionCombinations(source);
 
-        for(HashMap<String,CodeBean> dimensionCombination: dimenstionCombinations)
-        {
+        for (HashMap<String, CodeBean> dimensionCombination : dimenstionCombinations)
             records.add(getDocument(source, dimensionCombination));
-        }
+
         return records;
     }
 
@@ -72,20 +80,23 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         List<String> dimensionIds = new LinkedList<String>();
 
         // get all dimensions that are allowed AND existent in source
-        for(DimensionBean dimensionBean : source.getDataStructureBean.getDimensions())
-        {
-            if(getAllowedDimensionNames().contains(dimensionBean.getId()) {
+        for (DimensionBean dimensionBean : source.getDataStructureBean.getDimensions()) {
+            if (getAllowedDimensionNames().contains(dimensionBean.getId()))
                 dimensionId.add(dimensionBean.getId());
-            }
         }
 
         //Convert dimensions to a List.
         HashMap<String, List<CodeBean>> input = new HashMap<String, List<CodeBean>>();
-        for(String dimensionId : dimensionIds) {
+
+        for (String dimensionId : dimensionIds)
             input.put(dimensionId, getCodeList(source, dimensionId));
-        }
+
         //Build a list of all possible combination of values of each dimension.
-        return (0, input, new HashMap<String, CodeBean>(), new LinkedList<Map<String, CodeBean>());
+        return combineDimensions(0,
+                                 input,
+                                 new HashMap<String, CodeBean>(),
+                                 new LinkedList <Map<String, CodeBean>>()
+                                );
     }
 
     /**
@@ -105,9 +116,8 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         CodeListBean codeListBean
             = (CodeListBean) conceptBean.getCoreRepresentation().getRepresentation().getTargetReference();
 
-        for(SDMXBean code : codeListBean) {
+        for (SDMXBean code : codeListBean)
             codes.add((CodeBean) code);
-        }
     }
 
     /**
@@ -154,19 +164,21 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         int level,
         Map<String, List <CodeBean>> input,
         Map<String, CodeBean> currentRow,
-        List<Map <String, CodeBean>> output )
+        List<Map <String, CodeBean>> output)
     {
-        if(level == input.size()) {//all dimensions were visited -> we have reached a leaf
+        if (level == input.size()) { //all dimensions were visited -> we have reached a leaf
             // deep copy of current, because Java sucks at doing this natively
             Map<String, CodeBean> newMap = new HashMap<String, CodeBean>();
-            for(String key: currentRow.keySet()) {
-                    newMap.put(key, currentRow.get(key));
-            }
+
+            for (String key : currentRow.keySet())
+                newMap.put(key, currentRow.get(key));
+
             output.add(newMap);
             return output;
         } else { //we have not visited a leaf, so we need to iterate over all values of this level
             String dimension = (String) input.keySet().toArray()[level];
-            for(CodeBean codeBean: input.get(dimension)) {
+
+            for (CodeBean codeBean : input.get(dimension)) {
                 currentRow.put(dimension, codeBean);
                 output = combineDimensions(level + 1, input, currentRow, output);
                 // After a leaf was visited we remove the key
@@ -174,6 +186,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
                 currentRow.remove(dimension);
             }
         }
+
         return output;
     }
 
@@ -195,22 +208,44 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
     }
 
     private DataCiteJson getDocument(DataStructure source,
-            Hash<String, CodeBean> dimensionSelection)
+                                     Map<String, CodeBean> dimensionSelection)
     {
         Identifier identifier = new Identifier(getIdentifier(source, dimensionSelection));
         DataCiteJson document = createDataCiteStub(identifier);
 
         document.addTitles(getTitle(source, dimenstionSelection));
         document.setPublisher(etl.getPublisher());
-        document.addSubjects(getSubjects(source, dimensionSelection));
+        document.addSubjects(getSubjects(dimensionSelection));
         document.setLanguage(etl.getLanguage());
         document.addFormats(etl.getFormats());
         document.addRights(etl.getRightsList());
         document.addDescriptions(getDescription(source, dimensionSelection));
-        if (hasGeoDimension(source)) {
+
+        if (hasGeoDimension(source))
             documentaddGeoLocations(getGeoLocations(source));
+
+        document.addResearchData(getResearchData(source, dimensionSelection));
+    }
+
+    private String getIdentifier(DataStructure source,
+                                 Map<String, CodeBean> dimensionSelection)
+    {
+        StringBuilder identifierBuilder = new StringBuilder();
+        identifierBuilder.append(etl.getRestBaseUrl());
+        identifierBuilder.append("/");
+        identifierBuilder.append(source.getDataStructureBean().getId());
+        identifierBuilder.append("?");
+
+        for (String key : dimensionSelection.keySet()) {
+            identifierBuilder.append(key);
+            identifierBuilder.append("=");
+            identifierBuilder.append(dimensionSelection.get(key).getName());
+            identifierBuilder.append("&");
         }
-        document.setResearchDataList(getResearchDataList(source), identifier);
+
+        //delete the last "&"
+        identifierBuilder.setLenght(identifierBuilder.length() - 1);
+        return (identifierBuilder.toString());
     }
 
     /**
@@ -222,9 +257,68 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
      * @return Collection with one title
      */
     private Collection<Title> getTitle(DataStructure source,
-            Hash<String, CodeBean> dimensionSelection)
+                                       Map<String, CodeBean> dimensionSelection)
     {
-        
+        ArrayList titles = new ArrayList();
+        StringBuilder titleBuilder = StringBuilder();
+        titleBuilder.append(source.getEnglishOrFirstName());
+        titleBuilder.append("(");
+
+        for (String key : dimensionSelection.keySet()) {
+            titleBuilder.append(key);
+            titleBuilder.append(": ");
+            titleBuilder.append(dimensionSelection.get(key).getName());
+        }
+
+        titleBuilder.append(")");
+        titles.add(titleBuilder.toString());
+        return titles;
+    }
+
+    private Collection<Subject> getSubjects(Map<String, CodeBean> dimensionSelection)
+    {
+        ArrayList subjects = new ArrayList();
+
+        for (String key : dimensionSelection.keySet()) {
+            Subject subject = new Subject(key, EUROSTATConstants.LANGUAGE_DEFAULT_VALUE);
+            subjects.add(subject);
+        }
+
+        return subjects;
+
+    }
+
+    private Collection<Description> getDescription(DataStructure source,
+                                                   Map<String, CodeBean> dimensionSelection)
+    {
+        StringBuilder descriptionBuilder = new StringBuilder();
+        descriptionBuilder.append(source.getEnglishOrFirstName());
+    }
+
+    private boolean hasGeoDimension(Map<String, CodeBean> dimensionSelection)
+    {
+        if (dimensionSelection.get("GEO") != null)
+            return true;
+
+        return false;
+    }
+
+    private Collection<GeoLocation> getGeoLocations(
+        Map<String, CodeBean> dimensionSelection)
+    {
+        ArrayList geoLocations = new ArrayList();
+        geoLocations.add(new GeoLocation(dimensionSelection.get("GEO").getName()));
+        return geoLocations;
+    }
+
+    private Collection<ResearchData> getResearchData(DataStructure source,
+                                                     Map<String, CodeBean> dimensionSelection)
+    {
+        ArrayList researchData = new ArrayList();
+        researchData.add(new ResearchData(
+                             getIdentifier(source, dimensionSelection),
+                             source.getEnglishOrFirstName()));
+        return researchData;
     }
 
     /**
@@ -241,10 +335,10 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
 
         document.setPublisher(etl.getPublisher());
         document.setPublicationYear(
-                String.valueOf(Calender.getInstance().get(Calender.Year)));
+            String.valueOf(Calender.getInstance().get(Calender.Year)));
         document.setLanguage(etl.getLanguage());
         document.setResourceType(
-                new ResourceType("Statistical Data", ResourceTypeGeneral.Dataset));
+            new ResourceType("Statistical Data", ResourceTypeGeneral.Dataset));
         document.setFormats(etl.getFormats());
         document.setRightsList(etl.getRightsList());
 

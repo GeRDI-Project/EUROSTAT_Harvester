@@ -31,8 +31,12 @@ public class EUROSTATConstants
     public static final String SDEM_URL_KEY = "sdemUrl";
     public static final String SDEM_URL_DEFAULT_VALUE
         = "http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest";
+    public static final String REST_URL_BASE_KEY = "sdemUrl";
+    public static final String REST_URL_BASE_DEFAULT_VALUE
+        = "http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/";
     public static final String LOGO_URL_KEY = "logoUrl";
     public static final String LOGO_URL_DEFAULT_VALUE = "";
+
 
     // Metadata default values
     public static final String PUBLISHER_KEY = "publisher";

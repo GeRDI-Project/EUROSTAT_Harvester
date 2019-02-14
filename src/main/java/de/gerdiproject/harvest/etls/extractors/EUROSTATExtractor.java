@@ -105,16 +105,16 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<DataStructure>
         public DataStructure next()
         {
             final DataflowBean dataflowBean = dataflows.remove();
-            StructureReferenceBean structureReferenceBean 
+            StructureReferenceBean structureReferenceBean
                 = dataflowBean.getDataStructureRef().getMutableInstance();
-            if (structureReferenceBean.getMaintainableStructureType() 
-                    == SDMX_STRUCTURE_TYPE.DATASTRUCTURE) {
+
+            if (structureReferenceBean.getMaintainableStructureType()
+                == SDMX_STRUCTURE_TYPE.DATASTRUCTURE) {
                 return new DataStructure(
-                        dataflowBean.getName(),
-                        (DataStructureBean) structureReferenceBean.getTargetReference());
-           } else {
-               return next();
-           }
+                           dataflowBean.getName(),
+                           (DataStructureBean) structureReferenceBean.getTargetReference());
+            } else
+                return next();
         }
     }
 }
