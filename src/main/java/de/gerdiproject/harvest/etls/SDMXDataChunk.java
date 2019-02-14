@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.gerdiproject.harvest.etls.sdmx;
+package de.gerdiproject.harvest.etls;
 
 import java.util.List;
 import java.util.Set;
@@ -22,14 +22,14 @@ import org.sdmxsource.sdmx.api.model.beans.base.TextTypeWrapper;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 
 /**
- * This {@linkplain DataStructure} is a container for a SDMX dataflow with
+ * This {@linkplain SDMXDataChunk} is a container for a SDMX dataflow with
  * exactly one referenced SDMX data structure.
  * It is a composite of a List of names for the dataflow in different locales
  * and a {@linkplain DataStructureBean}
  *
  * @author Tobias Weber
  */
-public class DataStructure
+public class SDMXDataChunk
 {
     private List<TextTypeWrapper> names;
     private DataStructureBean dataStructureBean;
@@ -40,7 +40,7 @@ public class DataStructure
      * @param TextTypeWrapper List of names for the dataflow in different locales
      * @param DataStructureBean DataStructureBean with dimensions and codelists.
      */
-    public DataStructure(List<TextTypeWrapper> names,
+    public SDMXDataChunk(List<TextTypeWrapper> names,
                          DataStructureBean dataStructureBean)
     {
         this.names = names;
@@ -60,15 +60,15 @@ public class DataStructure
     /**
      * Get the English name, if it exists, if not pick the first one
      *
-     * @return containing the name of the Dataflow, which the DataStructure describes
+     * @return containing the name of the Dataflow, which the SDMXDataChunkdescribes
      */
     public String getEnglishOrFirstName()
     {
         for (TextTypeWrapper text : this.names) {
-            if (text.getLocale == "en")
+            if (text.getLocale() == "en")
                 return text.getValue();
         }
 
-        return this.names.get(0);
+        return this.names.get(0).getValue();
     }
 }

@@ -30,15 +30,15 @@ import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EUROSTATETL;
-import de.gerdiproject.harvest.etls.sdmx.DataStructure;
+import de.gerdiproject.harvest.etls.SDMXDataChunk;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
- * (meta-)data from EUROSTAT and bundles it into a {@linkplain DataStructure}.
+ * (meta-)data from EUROSTAT and bundles it into a {@linkplain SDMXDataChunk}.
  *
  * @author Tobias Weber
  */
-public class EUROSTATExtractor extends AbstractIteratorExtractor<DataStructure>
+public class EUROSTATExtractor<SDMXDataChunk> extends AbstractIteratorExtractor<SDMXDataChunk>
 {
     private String version = null;
     private int size = -1;
@@ -69,7 +69,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<DataStructure>
     }
 
     @Override
-    protected Iterator<DataStructure> extractAll() throws ExtractorException
+    protected Iterator<SDMXDataChunk> extractAll() throws ExtractorException
     {
         return new EUROSTATIterator(this.sdem.getStructureBeans(false).getDataflows());
     }
@@ -80,7 +80,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<DataStructure>
      *
      * @author Tobias Weber
      */
-    private static class EUROSTATIterator implements Iterator<DataStructure>
+    private class EUROSTATIterator implements Iterator<SDMXDataChunk>
     {
         private Queue<DataflowBean> dataflows = new LinkedList<>();
 
@@ -102,17 +102,18 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<DataStructure>
         }
 
         @Override
-        public DataStructure next()
+        public SDMXDataChunk next()
         {
             final DataflowBean dataflowBean = dataflows.remove();
             StructureReferenceBean structureReferenceBean
-                = dataflowBean.getDataStructureRef().getMutableInstance();
+                = dataflowBean.getDataStructureRef().createMutableInstance();
 
             if (structureReferenceBean.getMaintainableStructureType()
-                == SDMX_STRUCTURE_TYPE.DATASTRUCTURE) {
-                return new DataStructure(
-                           dataflowBean.getName(),
-                           (DataStructureBean) structureReferenceBean.getTargetReference());
+                == SDMX_STRUCTURE_TYPE.DATASOURCE) {
+                SDMXDataChunk sdmxDataChunk = new SDMXDataChunk(
+                    dataflowBean.getNames(),
+                    (DataStructureBean) structureReferenceBean.getMaintainableReference());
+                return sdmxDataChunk;
             } else
                 return next();
         }

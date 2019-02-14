@@ -15,26 +15,37 @@
  */
 package de.gerdiproject.harvest.etls.transformers;
 
+import java.lang.StringBuilder;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
+import org.sdmxsource.sdmx.api.model.beans.base.SDMXBean;
 import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
+import org.sdmxsource.sdmx.api.model.beans.codelist.CodelistBean;
+import org.sdmxsource.sdmx.api.model.beans.conceptscheme.ConceptBean;
+import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
+import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
+import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
+
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EUROSTATETL;
-import de.gerdiproject.harvest.etls.sdmx.DataStructure;
+import de.gerdiproject.harvest.etls.SDMXDataChunk;
+import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Description;
 import de.gerdiproject.json.datacite.GeoLocation;
 import de.gerdiproject.json.datacite.Identifier;
+import de.gerdiproject.json.datacite.ResourceType;
 import de.gerdiproject.json.datacite.Subject;
 import de.gerdiproject.json.datacite.Title;
+import de.gerdiproject.json.datacite.enums.ResourceTypeGeneral;
 import de.gerdiproject.json.datacite.extension.generic.ResearchData;
 
 /**
@@ -43,7 +54,7 @@ import de.gerdiproject.json.datacite.extension.generic.ResearchData;
  *
  * @author Tobias Weber
  */
-public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructure, LinkedList<DataCiteJson>>
+public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChunk, LinkedList<DataCiteJson>>
 {
     private EUROSTATETL eurostatETL;
 
@@ -55,14 +66,14 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
     }
 
     @Override
-    protected LinkedList<DataCiteJson> transformElement(DataStructure source)
+    protected LinkedList<DataCiteJson> transformElement(SDMXDataChunk source)
     {
         LinkedList<DataCiteJson> records = new LinkedList<DataCiteJson>();
 
-        LinkedList<HashMap<String, CodeBean>> dimensionCombinations
+        List<Map<String, CodeBean>> dimensionCombinations
             = getDimensionCombinations(source);
 
-        for (HashMap<String, CodeBean> dimensionCombination : dimenstionCombinations)
+        for (Map<String, CodeBean> dimensionCombination : dimensionCombinations)
             records.add(getDocument(source, dimensionCombination));
 
         return records;
@@ -71,18 +82,18 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
     /**
      * Get a list of dimension values which are both configured and present in the data structure
      *
-     * @param the DataStructure in question
+     * @param the SDMXDataChunk in question
      *
      * @return a list of all possible combinations of codes of each allowed and present dimension
      */
-    private List<Map<String, CodeBean>> getDimensionCombinations(DataStructure source)
+    private List<Map<String, CodeBean>> getDimensionCombinations(SDMXDataChunk source)
     {
         List<String> dimensionIds = new LinkedList<String>();
 
         // get all dimensions that are allowed AND existent in source
-        for (DimensionBean dimensionBean : source.getDataStructureBean.getDimensions()) {
+        for (DimensionBean dimensionBean : source.getDataStructureBean().getDimensions()) {
             if (getAllowedDimensionNames().contains(dimensionBean.getId()))
-                dimensionId.add(dimensionBean.getId());
+                dimensionIds.add(dimensionBean.getId());
         }
 
         //Convert dimensions to a List.
@@ -102,22 +113,30 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
     /**
      * Get a list of all Codes given a dimensionId
      *
-     * @param source the DataStructure to be searched
+     * @param source the SDMXDataChunk to be searched
      * @param dimensionId the ID of the dimension to be iterated over
      *
      * @return A list of all code values for the dimension in source
      */
-    private List<CodeBean> getCodeList(DataStructure source, String dimensionId)
+    private List<CodeBean> getCodeList(SDMXDataChunk source, String dimensionId)
     {
-        LinkedList<String> codes = new LinkedList<String>();
+        LinkedList<CodeBean> codes = new LinkedList<CodeBean>();
 
         DimensionBean dimensionBean = source.getDataStructureBean().getDimension(dimensionId);
-        ConceptBean conceptBean = (ConcepBean) dimensionBean.getConceptRole().getTargetReference();
-        CodeListBean codeListBean
-            = (CodeListBean) conceptBean.getCoreRepresentation().getRepresentation().getTargetReference();
+        List<CrossReferenceBean> conceptRole = dimensionBean.getConceptRole();
+        ConceptBean conceptBean
+            = (ConceptBean) conceptRole.get(0).createMutableInstance().getMaintainableReference();
 
-        for (SDMXBean code : codeListBean)
+        CodelistBean codeListBean
+            = (CodelistBean) conceptBean.getCoreRepresentation()
+              .getRepresentation()
+              .createMutableInstance()
+              .getMaintainableReference();
+
+        for (SDMXBean code : codeListBean.getItems())
             codes.add((CodeBean) code);
+
+        return codes;
     }
 
     /**
@@ -207,31 +226,32 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         };
     }
 
-    private DataCiteJson getDocument(DataStructure source,
+    private DataCiteJson getDocument(SDMXDataChunk source,
                                      Map<String, CodeBean> dimensionSelection)
     {
-        Identifier identifier = new Identifier(getIdentifier(source, dimensionSelection));
+        String identifier = getIdentifier(source, dimensionSelection);
         DataCiteJson document = createDataCiteStub(identifier);
 
-        document.addTitles(getTitle(source, dimenstionSelection));
-        document.setPublisher(etl.getPublisher());
+        document.addTitles(getTitle(source, dimensionSelection));
+        document.setPublisher(eurostatETL.getPublisher());
         document.addSubjects(getSubjects(dimensionSelection));
-        document.setLanguage(etl.getLanguage());
-        document.addFormats(etl.getFormats());
-        document.addRights(etl.getRightsList());
+        document.setLanguage(eurostatETL.getLanguage());
+        document.addFormats(eurostatETL.getFormats());
+        document.addRights(eurostatETL.getRightsList());
         document.addDescriptions(getDescription(source, dimensionSelection));
 
-        if (hasGeoDimension(source))
-            documentaddGeoLocations(getGeoLocations(source));
+        if (hasGeoDimension(dimensionSelection))
+            document.addGeoLocations(getGeoLocations(dimensionSelection));
 
         document.addResearchData(getResearchData(source, dimensionSelection));
+        return document;
     }
 
-    private String getIdentifier(DataStructure source,
+    private String getIdentifier(SDMXDataChunk source,
                                  Map<String, CodeBean> dimensionSelection)
     {
         StringBuilder identifierBuilder = new StringBuilder();
-        identifierBuilder.append(etl.getRestBaseUrl());
+        identifierBuilder.append(eurostatETL.getRestBaseUrl());
         identifierBuilder.append("/");
         identifierBuilder.append(source.getDataStructureBean().getId());
         identifierBuilder.append("?");
@@ -244,23 +264,23 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         }
 
         //delete the last "&"
-        identifierBuilder.setLenght(identifierBuilder.length() - 1);
+        identifierBuilder.setLength(identifierBuilder.length() - 1);
         return (identifierBuilder.toString());
     }
 
     /**
-     * Creates a title from the name of the DataStructure and all dimensionCodes
+     * Creates a title from the name of the SDMXDataChunk and all dimensionCodes
      *
-     * @param source DataStructure
+     * @param source SDMXDataChunk
      * @param dimensionSelection hash (dimensionName -> codeValue)
      *
      * @return Collection with one title
      */
-    private Collection<Title> getTitle(DataStructure source,
+    private Collection<Title> getTitle(SDMXDataChunk source,
                                        Map<String, CodeBean> dimensionSelection)
     {
         ArrayList titles = new ArrayList();
-        StringBuilder titleBuilder = StringBuilder();
+        StringBuilder titleBuilder = new StringBuilder();
         titleBuilder.append(source.getEnglishOrFirstName());
         titleBuilder.append("(");
 
@@ -288,11 +308,16 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
 
     }
 
-    private Collection<Description> getDescription(DataStructure source,
+    private Collection<Description> getDescription(SDMXDataChunk source,
                                                    Map<String, CodeBean> dimensionSelection)
     {
+        ArrayList descriptions = new ArrayList();
+
         StringBuilder descriptionBuilder = new StringBuilder();
         descriptionBuilder.append(source.getEnglishOrFirstName());
+        descriptions.add(descriptionBuilder.toString());
+
+        return descriptions;
     }
 
     private boolean hasGeoDimension(Map<String, CodeBean> dimensionSelection)
@@ -311,7 +336,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
         return geoLocations;
     }
 
-    private Collection<ResearchData> getResearchData(DataStructure source,
+    private Collection<ResearchData> getResearchData(SDMXDataChunk source,
                                                      Map<String, CodeBean> dimensionSelection)
     {
         ArrayList researchData = new ArrayList();
@@ -329,18 +354,18 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<DataStructu
      *
      * @return the DataCiteJson document
      */
-    private DataCiteJson createDataCiteStub(Identifier identifier)
+    private DataCiteJson createDataCiteStub(String identifier)
     {
         DataCiteJson document = new DataCiteJson(identifier);
 
-        document.setPublisher(etl.getPublisher());
-        document.setPublicationYear(
-            String.valueOf(Calender.getInstance().get(Calender.Year)));
-        document.setLanguage(etl.getLanguage());
+        document.setPublisher(eurostatETL.getPublisher());
+        Calendar calendar = Calendar.getInstance();
+        document.setPublicationYear(Calendar.getInstance().get(Calendar.YEAR));
+        document.setLanguage(eurostatETL.getLanguage());
         document.setResourceType(
             new ResourceType("Statistical Data", ResourceTypeGeneral.Dataset));
-        document.setFormats(etl.getFormats());
-        document.setRightsList(etl.getRightsList());
+        document.addFormats(eurostatETL.getFormats());
+        document.addRights(eurostatETL.getRightsList());
 
         return document;
     }

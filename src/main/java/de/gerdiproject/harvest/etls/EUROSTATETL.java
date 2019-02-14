@@ -17,6 +17,8 @@ package de.gerdiproject.harvest.etls;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -191,7 +193,7 @@ public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJ
      */
     public Set<String> getFormats()
     {
-        formats = new HashSet<String>();
+        HashSet<String> formats = new HashSet<String>();
         formats.add(this.formatParam.getValue());
         return formats;
     }
@@ -203,10 +205,9 @@ public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJ
      */
     public Set<Rights> getRightsList()
     {
-        rightsList = new HashSet<Rights>();
+        HashSet<Rights> rightsList = new HashSet<Rights>();
         rightsList.add(new Rights(
                            this.rightsNameParam.getValue(),
-                           getRightsName(),
                            "en-US",
                            this.rightsUriParam.getValue()));
 
