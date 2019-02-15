@@ -16,7 +16,6 @@
 package de.gerdiproject.harvest.etls;
 
 import java.util.List;
-import java.util.Set;
 
 import org.sdmxsource.sdmx.api.model.beans.base.TextTypeWrapper;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
@@ -65,7 +64,7 @@ public class SDMXDataChunk
     public String getEnglishOrFirstName()
     {
         for (TextTypeWrapper text : this.names) {
-            if (text.getLocale() == "en")
+            if (text.getLocale().equals("en"))
                 return text.getValue();
         }
 

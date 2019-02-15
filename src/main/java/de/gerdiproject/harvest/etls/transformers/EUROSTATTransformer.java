@@ -15,12 +15,10 @@
  */
 package de.gerdiproject.harvest.etls.transformers;
 
-import java.lang.StringBuilder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +31,6 @@ import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
 import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 
-
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EUROSTATETL;
 import de.gerdiproject.harvest.etls.SDMXDataChunk;
@@ -41,7 +38,6 @@ import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Description;
 import de.gerdiproject.json.datacite.GeoLocation;
-import de.gerdiproject.json.datacite.Identifier;
 import de.gerdiproject.json.datacite.ResourceType;
 import de.gerdiproject.json.datacite.Subject;
 import de.gerdiproject.json.datacite.Title;
@@ -273,21 +269,21 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
                                  Map<String, CodeBean> dimensionSelection)
     {
         StringBuilder identifierBuilder = new StringBuilder();
-        identifierBuilder.append(eurostatETL.getRestBaseUrl());
-        identifierBuilder.append("/");
-        identifierBuilder.append(source.getDataStructureBean().getId());
-        identifierBuilder.append("?");
+        identifierBuilder.append(eurostatETL.getRestBaseUrl())
+            .append("/")
+            .append(source.getDataStructureBean().getId())
+            .append("?");
 
         for (String key : dimensionSelection.keySet()) {
-            identifierBuilder.append(key);
-            identifierBuilder.append("=");
-            identifierBuilder.append(dimensionSelection.get(key).getName());
-            identifierBuilder.append("&");
+            identifierBuilder.append(key)
+                .append("=")
+                .append(dimensionSelection.get(key).getName())
+                .append("&");
         }
 
         //delete the last "&"
         identifierBuilder.setLength(identifierBuilder.length() - 1);
-        return (identifierBuilder.toString());
+        return identifierBuilder.toString();
     }
 
     /**
@@ -306,13 +302,13 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
     {
         ArrayList titles = new ArrayList();
         StringBuilder titleBuilder = new StringBuilder();
-        titleBuilder.append(source.getEnglishOrFirstName());
-        titleBuilder.append("(");
+        titleBuilder.append(source.getEnglishOrFirstName())
+            .append("(");
 
         for (String key : dimensionSelection.keySet()) {
-            titleBuilder.append(key);
-            titleBuilder.append(": ");
-            titleBuilder.append(dimensionSelection.get(key).getName());
+            titleBuilder.append(key)
+                .append(": ")
+                .append(dimensionSelection.get(key).getName());
         }
 
         titleBuilder.append(")");
@@ -428,7 +424,6 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         DataCiteJson document = new DataCiteJson(identifier);
 
         document.setPublisher(eurostatETL.getPublisher());
-        Calendar calendar = Calendar.getInstance();
         document.setPublicationYear(Calendar.getInstance().get(Calendar.YEAR));
         document.setLanguage(eurostatETL.getLanguage());
         document.setResourceType(

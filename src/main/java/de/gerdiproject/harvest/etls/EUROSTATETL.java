@@ -18,12 +18,9 @@ package de.gerdiproject.harvest.etls;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.List;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Function;
-
-import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 
 import de.gerdiproject.harvest.config.Configuration;
 import de.gerdiproject.harvest.config.parameters.StringParameter;
