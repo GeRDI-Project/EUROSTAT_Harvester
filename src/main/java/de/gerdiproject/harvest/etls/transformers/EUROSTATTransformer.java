@@ -270,15 +270,15 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
     {
         StringBuilder identifierBuilder = new StringBuilder();
         identifierBuilder.append(eurostatETL.getRestBaseUrl())
-            .append("/")
+            .append('/')
             .append(source.getDataStructureBean().getId())
-            .append("?");
+            .append('?');
 
         for (String key : dimensionSelection.keySet()) {
             identifierBuilder.append(key)
-                .append("=")
+                .append('=')
                 .append(dimensionSelection.get(key).getName())
-                .append("&");
+                .append('&');
         }
 
         //delete the last "&"
@@ -303,7 +303,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         ArrayList titles = new ArrayList();
         StringBuilder titleBuilder = new StringBuilder();
         titleBuilder.append(source.getEnglishOrFirstName())
-            .append("(");
+            .append('(');
 
         for (String key : dimensionSelection.keySet()) {
             titleBuilder.append(key)
@@ -311,7 +311,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
                 .append(dimensionSelection.get(key).getName());
         }
 
-        titleBuilder.append(")");
+        titleBuilder.append(')');
         titles.add(titleBuilder.toString());
         return titles;
     }
