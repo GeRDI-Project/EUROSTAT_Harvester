@@ -80,7 +80,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
      *
      * @author Tobias Weber
      */
-    private class EUROSTATIterator implements Iterator<SDMXDataChunk>
+    private static class EUROSTATIterator implements Iterator<SDMXDataChunk>
     {
         private Queue<DataflowBean> dataflows = new LinkedList<>();
 

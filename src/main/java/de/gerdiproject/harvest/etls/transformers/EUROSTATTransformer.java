@@ -185,8 +185,8 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
             // deep copy of current, because Java sucks at doing this natively
             Map<String, CodeBean> newMap = new HashMap<String, CodeBean>();
 
-            for (String key : currentRow.keySet())
-                newMap.put(key, currentRow.get(key));
+            for (Map.Entry<String, CodeBean> entry : currentRow.entrySet())
+                newMap.put(entry.getKey(), entry.getValue());
 
             output.add(newMap);
             return output;
@@ -274,10 +274,10 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
             .append(source.getDataStructureBean().getId())
             .append('?');
 
-        for (String key : dimensionSelection.keySet()) {
-            identifierBuilder.append(key)
+        for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
+            identifierBuilder.append(entry.getKey())
                 .append('=')
-                .append(dimensionSelection.get(key).getName())
+                .append(entry.getValue().getName())
                 .append('&');
         }
 
@@ -305,10 +305,10 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         titleBuilder.append(source.getEnglishOrFirstName())
             .append('(');
 
-        for (String key : dimensionSelection.keySet()) {
-            titleBuilder.append(key)
+        for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
+            titleBuilder.append(entry.getKey())
                 .append(": ")
-                .append(dimensionSelection.get(key).getName());
+                .append(entry.getValue().getName());
         }
 
         titleBuilder.append(')');
