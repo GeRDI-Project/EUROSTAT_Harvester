@@ -270,15 +270,15 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
     {
         StringBuilder identifierBuilder = new StringBuilder();
         identifierBuilder.append(eurostatETL.getRestBaseUrl())
-            .append('/')
-            .append(source.getDataStructureBean().getId())
-            .append('?');
+        .append('/')
+        .append(source.getDataStructureBean().getId())
+        .append('?');
 
         for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
             identifierBuilder.append(entry.getKey())
-                .append('=')
-                .append(entry.getValue().getName())
-                .append('&');
+            .append('=')
+            .append(entry.getValue().getName())
+            .append('&');
         }
 
         //delete the last "&"
@@ -303,12 +303,12 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         ArrayList titles = new ArrayList();
         StringBuilder titleBuilder = new StringBuilder();
         titleBuilder.append(source.getEnglishOrFirstName())
-            .append('(');
+        .append('(');
 
         for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
             titleBuilder.append(entry.getKey())
-                .append(": ")
-                .append(entry.getValue().getName());
+            .append(": ")
+            .append(entry.getValue().getName());
         }
 
         titleBuilder.append(')');
