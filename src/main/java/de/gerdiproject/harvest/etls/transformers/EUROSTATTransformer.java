@@ -226,6 +226,16 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         };
     }
 
+    /**
+     * Returns a DataCiteJson for a given dimension selection.
+     *
+     * Will be called multiple times for one SDMXDataChunk.
+     *
+     * @param source SDMXDataChunk (for global information)
+     * @param dimensionSelection the specific selection of dimension + values
+     *
+     * @return The DataCiteJSON document
+     */
     private DataCiteJson getDocument(SDMXDataChunk source,
                                      Map<String, CodeBean> dimensionSelection)
     {
@@ -238,7 +248,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         document.setLanguage(eurostatETL.getLanguage());
         document.addFormats(eurostatETL.getFormats());
         document.addRights(eurostatETL.getRightsList());
-        document.addDescriptions(getDescription(source, dimensionSelection));
+        document.addDescriptions(getDescription(source));
 
         if (hasGeoDimension(dimensionSelection))
             document.addGeoLocations(getGeoLocations(dimensionSelection));
@@ -247,6 +257,18 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         return document;
     }
 
+    /**
+     * Returns an Identifier for the document.
+     *
+     * The identifier will not be a DOI, but a URL to the REST-URL
+     * which can be used to retrieve exactle the data corresponding to the
+     * selection of dimension + value.
+     *
+     * @param source SDMXDataChunk (for global information)
+     * @param dimensionSelection the specific selection of dimension + values
+     *
+     * @return String
+     */
     private String getIdentifier(SDMXDataChunk source,
                                  Map<String, CodeBean> dimensionSelection)
     {
@@ -269,10 +291,13 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
     }
 
     /**
-     * Creates a title from the name of the SDMXDataChunk and all dimensionCodes
+     * Creates a title for the document.
+     *
+     * The title is composed of the name of the SDMX Dataflow and the
+     * selection of dimension + value.
      *
      * @param source SDMXDataChunk
-     * @param dimensionSelection hash (dimensionName -> codeValue)
+     * @param dimensionSelection the specific selection of dimension + values
      *
      * @return Collection with one title
      */
@@ -295,6 +320,15 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         return titles;
     }
 
+    /**
+     * Creates a collection of subjects for the document.
+     *
+     * The subjects correspond to the name of the dimensions of the dimensionSelection.
+     *
+     * @param dimensionSelection the specific selection of dimension + values
+     *
+     * @return Collection with subjects
+     */
     private Collection<Subject> getSubjects(Map<String, CodeBean> dimensionSelection)
     {
         ArrayList subjects = new ArrayList();
@@ -308,8 +342,16 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
 
     }
 
-    private Collection<Description> getDescription(SDMXDataChunk source,
-                                                   Map<String, CodeBean> dimensionSelection)
+    /**
+     * Creates a description for the document.
+     *
+     * The description is composed of the name of the SDMX Dataflow.
+     *
+     * @param source SDMXDataChunk
+     *
+     * @return Collection with one description
+     */
+    private Collection<Description> getDescription(SDMXDataChunk source)
     {
         ArrayList descriptions = new ArrayList();
 
@@ -320,6 +362,14 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         return descriptions;
     }
 
+    /**
+     * Indicator whether there is geo-related information in the dimensions.
+     *
+     *
+     * @param dimensionSelection the specific selection of dimension + values
+     *
+     * @return Boolean indicating the availability of geo-related information
+     */
     private boolean hasGeoDimension(Map<String, CodeBean> dimensionSelection)
     {
         if (dimensionSelection.get("GEO") != null)
@@ -328,6 +378,15 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         return false;
     }
 
+    /**
+     * Creates a geoLocation-field for the document.
+     *
+     * We only use the name to set geoLocationName
+     *
+     * @param dimensionSelection the specific selection of dimension + values
+     *
+     * @return Collection with one GeoLocation
+     */
     private Collection<GeoLocation> getGeoLocations(
         Map<String, CodeBean> dimensionSelection)
     {
@@ -336,6 +395,16 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         return geoLocations;
     }
 
+    /**
+     * Creates ResearchData information for the document.
+     *
+     * The link to the research data is identical to the identifier of the document
+     *
+     * @param source SDMXDataChunk
+     * @param dimensionSelection the specific selection of dimension + values
+     *
+     * @return Collection with one ResearchData object
+     */
     private Collection<ResearchData> getResearchData(SDMXDataChunk source,
                                                      Map<String, CodeBean> dimensionSelection)
     {

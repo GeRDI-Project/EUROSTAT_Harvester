@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -39,7 +40,7 @@ import de.gerdiproject.json.datacite.Rights;
  *
  * @author Tobias Weber
  */
-public class EUROSTATETL extends StaticIteratorETL<CrossReferenceBean, DataCiteJson>
+public class EUROSTATETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<DataCiteJson>>
 {
     // URLs
     private StringParameter sdemUrlParam;

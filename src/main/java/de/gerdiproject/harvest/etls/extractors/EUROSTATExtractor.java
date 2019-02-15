@@ -38,7 +38,7 @@ import de.gerdiproject.harvest.etls.SDMXDataChunk;
  *
  * @author Tobias Weber
  */
-public class EUROSTATExtractor<SDMXDataChunk> extends AbstractIteratorExtractor<SDMXDataChunk>
+public class EUROSTATExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
 {
     private String version = null;
     private int size = -1;
