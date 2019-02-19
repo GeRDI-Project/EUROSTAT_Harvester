@@ -15,7 +15,6 @@
  */
 package de.gerdiproject.harvest.etls.transformers;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -85,19 +84,15 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      */
     private List<Map<String, CodeBean>> getDimensionCombinations(SDMXDataChunk source)
     {
-        List<String> dimensionIds = new LinkedList<String>();
+        HashMap<String, List<CodeBean>> input = new HashMap<String, List<CodeBean>>();
 
         // get all dimensions that are allowed AND existent in source
         for (DimensionBean dimensionBean : source.getDataStructureBean().getDimensions()) {
-            if (eurostatETL.getAllowedDimensionNames().contains(dimensionBean.getId()))
-                dimensionIds.add(dimensionBean.getId());
+            final String id = dimensionBean.getId();
+
+            if (eurostatETL.getAllowedDimensionNames().contains(id))
+                input.put(id, getCodeList(source, id));
         }
-
-        //Convert dimensions to a List.
-        HashMap<String, List<CodeBean>> input = new HashMap<String, List<CodeBean>>();
-
-        for (String dimensionId : dimensionIds)
-            input.put(dimensionId, getCodeList(source, dimensionId));
 
         //Build a list of all possible combination of values of each dimension.
         return combineDimensions(0,
