@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.gerdiproject.harvest.etls.constants;
+package de.gerdiproject.harvest.eurostat.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

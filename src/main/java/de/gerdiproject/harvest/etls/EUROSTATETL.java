@@ -25,8 +25,8 @@ import java.util.function.Function;
 import de.gerdiproject.harvest.config.Configuration;
 import de.gerdiproject.harvest.config.parameters.StringParameter;
 import de.gerdiproject.harvest.config.parameters.constants.ParameterMappingFunctions;
-import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
 import de.gerdiproject.harvest.etls.extractors.EUROSTATExtractor;
+import de.gerdiproject.harvest.eurostat.constants.EUROSTATConstants;
 import de.gerdiproject.harvest.etls.transformers.EUROSTATTransformer;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Rights;
@@ -60,6 +60,7 @@ public class EUROSTATETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<Dat
 
     //TODO: add or remove EventListeners?
     //TODO: Do we need createTransformer- or createExtractor-methods.
+
 
     @Override
     protected void registerParameters()

@@ -34,7 +34,7 @@ import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EUROSTATETL;
 import de.gerdiproject.harvest.etls.SDMXDataChunk;
-import de.gerdiproject.harvest.etls.constants.EUROSTATConstants;
+import de.gerdiproject.harvest.eurostat.constants.EUROSTATConstants;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Description;
 import de.gerdiproject.json.datacite.GeoLocation;
