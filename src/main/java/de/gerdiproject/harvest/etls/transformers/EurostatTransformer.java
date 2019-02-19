@@ -32,9 +32,9 @@ import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
 import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
-import de.gerdiproject.harvest.etls.EUROSTATETL;
+import de.gerdiproject.harvest.etls.EurostatETL;
 import de.gerdiproject.harvest.etls.SDMXDataChunk;
-import de.gerdiproject.harvest.eurostat.constants.EUROSTATConstants;
+import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Description;
 import de.gerdiproject.json.datacite.GeoLocation;
@@ -50,15 +50,15 @@ import de.gerdiproject.json.datacite.extension.generic.ResearchData;
  *
  * @author Tobias Weber
  */
-public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChunk, LinkedList<DataCiteJson>>
+public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChunk, LinkedList<DataCiteJson>>
 {
-    private EUROSTATETL eurostatETL;
+    private EurostatETL eurostatETL;
 
     @Override
     public void init(AbstractETL<?, ?> etl)
     {
         super.init(etl);
-        eurostatETL = (EUROSTATETL) etl;
+        eurostatETL = (EurostatETL) etl;
     }
 
     @Override
@@ -330,7 +330,7 @@ public class EUROSTATTransformer extends AbstractIteratorTransformer<SDMXDataChu
         ArrayList subjects = new ArrayList();
 
         for (String key : dimensionSelection.keySet()) {
-            Subject subject = new Subject(key, EUROSTATConstants.LANGUAGE_DEFAULT_VALUE);
+            Subject subject = new Subject(key, EurostatConstants.LANGUAGE_DEFAULT_VALUE);
             subjects.add(subject);
         }
 

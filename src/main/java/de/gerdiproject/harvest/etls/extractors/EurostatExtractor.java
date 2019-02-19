@@ -29,16 +29,16 @@ import org.sdmxsource.sdmx.structureparser.manager.parsing.impl.StructureParsing
 import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
-import de.gerdiproject.harvest.etls.EUROSTATETL;
+import de.gerdiproject.harvest.etls.EurostatETL;
 import de.gerdiproject.harvest.etls.SDMXDataChunk;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
- * (meta-)data from EUROSTAT and bundles it into a {@linkplain SDMXDataChunk}.
+ * (meta-)data from Eurostat and bundles it into a {@linkplain SDMXDataChunk}.
  *
  * @author Tobias Weber
  */
-public class EUROSTATExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
+public class EurostatExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
 {
     private String version = null;
     private int size = -1;
@@ -50,7 +50,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
     {
         super.init(etl);
 
-        final EUROSTATETL eurostatEtl = (EUROSTATETL) etl;
+        final EurostatETL eurostatEtl = (EurostatETL) etl;
         sdem = parser.parseStructures(new ReadableDataLocationTmp(eurostatEtl.getSdemUrl()));
         size = sdem.getStructureBeans(false).getDataflows().size();
         version = sdem.getStructureBeans(false).getHeader().getId();
@@ -71,7 +71,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
     @Override
     protected Iterator<SDMXDataChunk> extractAll() throws ExtractorException
     {
-        return new EUROSTATIterator(this.sdem.getStructureBeans(false).getDataflows());
+        return new EurostatIterator(this.sdem.getStructureBeans(false).getDataflows());
     }
 
     /**
@@ -80,7 +80,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
      *
      * @author Tobias Weber
      */
-    private static class EUROSTATIterator implements Iterator<SDMXDataChunk>
+    private static class EurostatIterator implements Iterator<SDMXDataChunk>
     {
         private Queue<DataflowBean> dataflows = new LinkedList<>();
 
@@ -89,7 +89,7 @@ public class EUROSTATExtractor extends AbstractIteratorExtractor<SDMXDataChunk>
          *
          * @param dataflows set of DataflowBeans to be added to the queue
          */
-        public EUROSTATIterator(Set<DataflowBean> dataflows)
+        public EurostatIterator(Set<DataflowBean> dataflows)
 
         {
             dataflows.addAll(dataflows);
