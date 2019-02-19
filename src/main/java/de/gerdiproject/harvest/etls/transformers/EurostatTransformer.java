@@ -89,7 +89,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
 
         // get all dimensions that are allowed AND existent in source
         for (DimensionBean dimensionBean : source.getDataStructureBean().getDimensions()) {
-            if (getAllowedDimensionNames().contains(dimensionBean.getId()))
+            if (eurostatETL.getAllowedDimensionNames().contains(dimensionBean.getId()))
                 dimensionIds.add(dimensionBean.getId());
         }
 
@@ -204,23 +204,6 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
         }
 
         return output;
-    }
-
-
-    /**
-     * A list of dimensions that are supported
-     *
-     * @return list of names of dimensions as strings
-     */
-    private List<String> getAllowedDimensionNames()
-    {
-        return new ArrayList<String>() {
-            {
-                add("NA_ITEM");
-                add("GEO");
-                add("UNIT");
-            }
-        };
     }
 
     /**

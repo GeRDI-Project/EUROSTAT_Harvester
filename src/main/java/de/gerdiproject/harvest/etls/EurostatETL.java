@@ -17,8 +17,11 @@ package de.gerdiproject.harvest.etls;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -49,7 +52,8 @@ public class EurostatETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<Dat
     private StringParameter rightsNameParam;
     private StringParameter rightsUriParam;
     private StringParameter restBaseUrlParam;
-
+    private static final List<String> ALLOWED_DIMENSIONS
+        = Collections.unmodifiableList(Arrays.asList("NA_ITEM", "GEO", "UNIT"));
     /**
      * Constructor
      */
@@ -221,5 +225,15 @@ public class EurostatETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<Dat
     public String getRestBaseUrl()
     {
         return this.restBaseUrlParam.getValue();
+    }
+
+    /**
+     * Getter for the allowed SDMX dimensions
+     *
+     * @return the list with names of allowed dimensions
+     */
+    public List<String> getAllowedDimensionNames()
+    {
+        return ALLOWED_DIMENSIONS;
     }
 }
