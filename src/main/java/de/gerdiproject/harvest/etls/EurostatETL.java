@@ -192,7 +192,7 @@ public class EurostatETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<Dat
      */
     public Set<String> getFormats()
     {
-        HashSet<String> formats = new HashSet<String>();
+        HashSet<String> formats = new HashSet<>();
         formats.add(this.formatParam.getValue());
         return formats;
     }

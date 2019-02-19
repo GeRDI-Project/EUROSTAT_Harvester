@@ -58,4 +58,7 @@ public class EurostatConstants
                                                           + EurostatConstants.SDEM_URL_KEY
                                                           + "'-parameter in the config!";
     public static final String NO_RECORDS_ERROR = "The URL '%s' did not yield any harvestable records! Change the parameters in the config!";
+
+    //MISC
+    public static final String GEO_DIMENSION = "GEO";
 }

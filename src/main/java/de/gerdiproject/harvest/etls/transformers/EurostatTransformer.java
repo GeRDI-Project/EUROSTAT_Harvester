@@ -41,6 +41,7 @@ import de.gerdiproject.json.datacite.GeoLocation;
 import de.gerdiproject.json.datacite.ResourceType;
 import de.gerdiproject.json.datacite.Subject;
 import de.gerdiproject.json.datacite.Title;
+import de.gerdiproject.json.datacite.enums.DescriptionType;
 import de.gerdiproject.json.datacite.enums.ResourceTypeGeneral;
 import de.gerdiproject.json.datacite.extension.generic.ResearchData;
 
@@ -244,7 +245,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
         document.setLanguage(eurostatETL.getLanguage());
         document.addFormats(eurostatETL.getFormats());
         document.addRights(eurostatETL.getRightsList());
-        document.addDescriptions(getDescription(source));
+        document.addDescriptions(getDescription(source, dimensionSelection));
 
         if (hasGeoDimension(dimensionSelection))
             document.addGeoLocations(getGeoLocations(dimensionSelection));
@@ -300,7 +301,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
     private Collection<Title> getTitle(SDMXDataChunk source,
                                        Map<String, CodeBean> dimensionSelection)
     {
-        ArrayList titles = new ArrayList();
+        final List<Title> titles = new LinkedList<>();
         StringBuilder titleBuilder = new StringBuilder();
         titleBuilder.append(source.getEnglishOrFirstName())
         .append('(');
@@ -308,11 +309,14 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
         for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
             titleBuilder.append(entry.getKey())
             .append(": ")
-            .append(entry.getValue().getName());
+            .append(entry.getValue().getName())
+            .append(", ");
         }
 
+        //delete the last ", "
+        titleBuilder.setLength(titleBuilder.length() - 2);
         titleBuilder.append(')');
-        titles.add(titleBuilder.toString());
+        titles.add(new Title(titleBuilder.toString()));
         return titles;
     }
 
@@ -327,7 +331,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      */
     private Collection<Subject> getSubjects(Map<String, CodeBean> dimensionSelection)
     {
-        ArrayList subjects = new ArrayList();
+        final List<Subject> subjects = new LinkedList<>();
 
         for (String key : dimensionSelection.keySet()) {
             Subject subject = new Subject(key, EurostatConstants.LANGUAGE_DEFAULT_VALUE);
@@ -347,13 +351,25 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      *
      * @return Collection with one description
      */
-    private Collection<Description> getDescription(SDMXDataChunk source)
+    private Collection<Description> getDescription(SDMXDataChunk source,
+                                                   Map<String, CodeBean> dimensionSelection)
     {
-        ArrayList descriptions = new ArrayList();
+        final List<Description> descriptions = new LinkedList<>();
 
         StringBuilder descriptionBuilder = new StringBuilder();
         descriptionBuilder.append(source.getEnglishOrFirstName());
-        descriptions.add(descriptionBuilder.toString());
+        descriptionBuilder.append("\n");
+
+        for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
+            descriptionBuilder.append(entry.getKey())
+            .append(": ")
+            .append(entry.getValue().getName())
+            .append(", ");
+        }
+
+        descriptions.add(new Description(
+                             descriptionBuilder.toString(),
+                             DescriptionType.Abstract));
 
         return descriptions;
     }
@@ -368,7 +384,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      */
     private boolean hasGeoDimension(Map<String, CodeBean> dimensionSelection)
     {
-        if (dimensionSelection.get("GEO") != null)
+        if (dimensionSelection.get(EurostatConstants.GEO_DIMENSION) != null)
             return true;
 
         return false;
@@ -386,8 +402,11 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
     private Collection<GeoLocation> getGeoLocations(
         Map<String, CodeBean> dimensionSelection)
     {
-        ArrayList geoLocations = new ArrayList();
-        geoLocations.add(new GeoLocation(dimensionSelection.get("GEO").getName()));
+        final List<GeoLocation> geoLocations = new LinkedList<>();
+        geoLocations.add(
+            new GeoLocation(
+                dimensionSelection.get(
+                    EurostatConstants.GEO_DIMENSION).getName()));
         return geoLocations;
     }
 
@@ -404,7 +423,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
     private Collection<ResearchData> getResearchData(SDMXDataChunk source,
                                                      Map<String, CodeBean> dimensionSelection)
     {
-        ArrayList researchData = new ArrayList();
+        List<ResearchData> researchData = new LinkedList<>();
         researchData.add(new ResearchData(
                              getIdentifier(source, dimensionSelection),
                              source.getEnglishOrFirstName()));
