@@ -357,7 +357,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
         final List<Description> descriptions = new LinkedList<>();
 
         StringBuilder descriptionBuilder = new StringBuilder();
-        descriptionBuilder.append(source.getEnglishOrFirstName());
+        descriptionBuilder.append(source.getEnglishOrFirstName())
         .append('\n');
 
         for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
