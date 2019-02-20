@@ -17,18 +17,12 @@ package de.gerdiproject.harvest.etls.transformers;
 
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.sdmxsource.sdmx.api.model.beans.base.SDMXBean;
 import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
-import org.sdmxsource.sdmx.api.model.beans.codelist.CodelistBean;
-import org.sdmxsource.sdmx.api.model.beans.conceptscheme.ConceptBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
-import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
-import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;

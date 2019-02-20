@@ -39,7 +39,6 @@ import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
-import de.gerdiproject.harvest.etls.extractors.SdmxVO;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
 
 /**
