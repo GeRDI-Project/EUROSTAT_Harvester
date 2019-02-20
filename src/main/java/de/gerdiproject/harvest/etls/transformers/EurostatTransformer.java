@@ -32,7 +32,7 @@ import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
-import de.gerdiproject.harvest.etls.SDMXDataChunk;
+import de.gerdiproject.harvest.etls.extractors.SdmxVO;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Description;
@@ -50,7 +50,7 @@ import de.gerdiproject.json.datacite.extension.generic.ResearchData;
  *
  * @author Tobias Weber
  */
-public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChunk, LinkedList<DataCiteJson>>
+public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, DataCiteJson>
 {
     private EurostatETL eurostatETL;
 
@@ -59,146 +59,6 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
     {
         super.init(etl);
         eurostatETL = (EurostatETL) etl;
-    }
-
-    @Override
-    protected LinkedList<DataCiteJson> transformElement(SDMXDataChunk source)
-    {
-        LinkedList<DataCiteJson> records = new LinkedList<DataCiteJson>();
-
-        List<Map<String, CodeBean>> dimensionCombinations
-            = getDimensionCombinations(source);
-
-        for (Map<String, CodeBean> dimensionCombination : dimensionCombinations)
-            records.add(getDocument(source, dimensionCombination));
-
-        return records;
-    }
-
-    /**
-     * Get a list of dimension values which are both configured and present in the data structure
-     *
-     * @param the SDMXDataChunk in question
-     *
-     * @return a list of all possible combinations of codes of each allowed and present dimension
-     */
-    private List<Map<String, CodeBean>> getDimensionCombinations(SDMXDataChunk source)
-    {
-        HashMap<String, List<CodeBean>> input = new HashMap<String, List<CodeBean>>();
-
-        // get all dimensions that are allowed AND existent in source
-        for (DimensionBean dimensionBean : source.getDataStructureBean().getDimensions()) {
-            final String id = dimensionBean.getId();
-
-            if (eurostatETL.getAllowedDimensionNames().contains(id))
-                input.put(id, getCodeList(source, id));
-        }
-
-        //Build a list of all possible combination of values of each dimension.
-        return combineDimensions(0,
-                                 input,
-                                 new HashMap<String, CodeBean>(),
-                                 new LinkedList <Map<String, CodeBean>>()
-                                );
-    }
-
-    /**
-     * Get a list of all Codes given a dimensionId
-     *
-     * @param source the SDMXDataChunk to be searched
-     * @param dimensionId the ID of the dimension to be iterated over
-     *
-     * @return A list of all code values for the dimension in source
-     */
-    private List<CodeBean> getCodeList(SDMXDataChunk source, String dimensionId)
-    {
-        LinkedList<CodeBean> codes = new LinkedList<CodeBean>();
-
-        DimensionBean dimensionBean = source.getDataStructureBean().getDimension(dimensionId);
-        List<CrossReferenceBean> conceptRole = dimensionBean.getConceptRole();
-        ConceptBean conceptBean
-            = (ConceptBean) conceptRole.get(0).createMutableInstance().getMaintainableReference();
-
-        CodelistBean codeListBean
-            = (CodelistBean) conceptBean.getCoreRepresentation()
-              .getRepresentation()
-              .createMutableInstance()
-              .getMaintainableReference();
-
-        for (SDMXBean code : codeListBean.getItems())
-            codes.add((CodeBean) code);
-
-        return codes;
-    }
-
-    /**
-     * This function transforms a map of n sets of Strings with arbitrary lengths
-     * to a set of maps with n key/value pairs, comprising all possible combinations
-     * of the elements of the input maps.
-     *
-     * Example:
-     * Input: { "article":  ["a", "the"],
-     *          "adjective: ["fat"],
-     *          "noun": ["cop", "god", "cod"] }
-     * Output: [
-     *          { "article" : "a",   "adjective" : "fat", "noun" : "cop" },
-     *          { "article" : "a",   "adjective" : "fat", "noun" : "god" },
-     *          { "article" : "a",   "adjective" : "fat", "noun" : "cod" },
-     *          { "article" : "the", "adjective" : "fat", "noun" : "cop" },
-     *          { "article" : "the", "adjective" : "fat", "noun" : "god" },
-     *          { "article" : "the", "adjective" : "fat", "noun" : "cod" },
-     *
-     * We use recursion to traverse to each leaf of this tree
-     *
-     *                  |
-     *         ------------------
-     *        "a"              "the"
-     *         |                 |
-     *       "fat"             "fat"
-     *         |                 |
-     *   -------------     -------------
-     *   |     |     |     |     |     |
-     * "cop" "god" "cod" "cop" "god" "cod"
-     *
-     * Idea for this implementation:
-     * https://stackoverflow.com/questions/8173862/map-of-sets-into-list-of-all-combinations
-     *
-     * @param level tracks the current level in the tree or number of recursions happened.
-     * @param input Map with the Sets to be combined
-     * @param currentRow the current combination that is assembled
-     * @param output intermediate list of combinations to be calculated (manage state among recursions)
-     *
-     * @return list of combinations of the element of the input maps
-     */
-
-    private static List<Map <String, CodeBean>> combineDimensions(
-        int level,
-        Map<String, List <CodeBean>> input,
-        Map<String, CodeBean> currentRow,
-        List<Map <String, CodeBean>> output)
-    {
-        if (level == input.size()) { //all dimensions were visited -> we have reached a leaf
-            // deep copy of current, because Java sucks at doing this natively
-            Map<String, CodeBean> newMap = new HashMap<String, CodeBean>();
-
-            for (Map.Entry<String, CodeBean> entry : currentRow.entrySet())
-                newMap.put(entry.getKey(), entry.getValue());
-
-            output.add(newMap);
-            return output;
-        } else { //we have not visited a leaf, so we need to iterate over all values of this level
-            String dimension = (String) input.keySet().toArray()[level];
-
-            for (CodeBean codeBean : input.get(dimension)) {
-                currentRow.put(dimension, codeBean);
-                output = combineDimensions(level + 1, input, currentRow, output);
-                // After a leaf was visited we remove the key
-                // (otherwise the current key/value-pair would be part of all rows added to the output).
-                currentRow.remove(dimension);
-            }
-        }
-
-        return output;
     }
 
     /**
@@ -211,24 +71,24 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      *
      * @return The DataCiteJSON document
      */
-    private DataCiteJson getDocument(SDMXDataChunk source,
-                                     Map<String, CodeBean> dimensionSelection)
+    @Override
+    protected DataCiteJson transformElement(SdmxVO source)
     {
-        String identifier = getIdentifier(source, dimensionSelection);
+        String identifier = getIdentifier(source);
         DataCiteJson document = createDataCiteStub(identifier);
 
-        document.addTitles(getTitle(source, dimensionSelection));
+        document.addTitles(getTitle(source));
         document.setPublisher(eurostatETL.getPublisher());
-        document.addSubjects(getSubjects(dimensionSelection));
+        document.addSubjects(getSubjects(source));
         document.setLanguage(eurostatETL.getLanguage());
         document.addFormats(eurostatETL.getFormats());
         document.addRights(eurostatETL.getRightsList());
-        document.addDescriptions(getDescription(source, dimensionSelection));
+        document.addDescriptions(getDescription(source));
 
-        if (hasGeoDimension(dimensionSelection))
-            document.addGeoLocations(getGeoLocations(dimensionSelection));
+        if (hasGeoDimension(source))
+            document.addGeoLocations(getGeoLocations(source));
 
-        document.addResearchData(getResearchData(source, dimensionSelection));
+        document.addResearchData(getResearchData(source));
         return document;
     }
 
@@ -239,13 +99,11 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      * which can be used to retrieve exactle the data corresponding to the
      * selection of dimension + value.
      *
-     * @param source SDMXDataChunk (for global information)
-     * @param dimensionSelection the specific selection of dimension + values
+     * @param source value object
      *
      * @return String
      */
-    private String getIdentifier(SDMXDataChunk source,
-                                 Map<String, CodeBean> dimensionSelection)
+    private String getIdentifier(SdmxVO source)
     {
         StringBuilder identifierBuilder = new StringBuilder();
         identifierBuilder.append(eurostatETL.getRestBaseUrl())
@@ -253,7 +111,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
         .append(source.getDataStructureBean().getId())
         .append('?');
 
-        for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
+        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
             identifierBuilder.append(entry.getKey())
             .append('=')
             .append(entry.getValue().getName())
@@ -262,6 +120,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
 
         //delete the last "&"
         identifierBuilder.setLength(identifierBuilder.length() - 1);
+
         return identifierBuilder.toString();
     }
 
@@ -271,20 +130,18 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      * The title is composed of the name of the SDMX Dataflow and the
      * selection of dimension + value.
      *
-     * @param source SDMXDataChunk
-     * @param dimensionSelection the specific selection of dimension + values
+     * @param source value object
      *
      * @return Collection with one title
      */
-    private Collection<Title> getTitle(SDMXDataChunk source,
-                                       Map<String, CodeBean> dimensionSelection)
+    private Collection<Title> getTitle(SdmxVO source)
     {
         final List<Title> titles = new LinkedList<>();
         StringBuilder titleBuilder = new StringBuilder();
         titleBuilder.append(source.getEnglishOrFirstName())
         .append('(');
 
-        for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
+        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
             titleBuilder.append(entry.getKey())
             .append(": ")
             .append(entry.getValue().getName())
@@ -295,6 +152,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
         titleBuilder.setLength(titleBuilder.length() - 2);
         titleBuilder.append(')');
         titles.add(new Title(titleBuilder.toString()));
+
         return titles;
     }
 
@@ -303,21 +161,20 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      *
      * The subjects correspond to the name of the dimensions of the dimensionSelection.
      *
-     * @param dimensionSelection the specific selection of dimension + values
+     * @param source value object
      *
      * @return Collection with subjects
      */
-    private Collection<Subject> getSubjects(Map<String, CodeBean> dimensionSelection)
+    private Collection<Subject> getSubjects(SdmxVO source)
     {
         final List<Subject> subjects = new LinkedList<>();
 
-        for (String key : dimensionSelection.keySet()) {
+        for (String key : source.getDimensions().keySet()) {
             Subject subject = new Subject(key, EurostatConstants.LANGUAGE_DEFAULT_VALUE);
             subjects.add(subject);
         }
 
         return subjects;
-
     }
 
     /**
@@ -325,12 +182,11 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      *
      * The description is composed of the name of the SDMX Dataflow.
      *
-     * @param source SDMXDataChunk
+     * @param source value object
      *
      * @return Collection with one description
      */
-    private Collection<Description> getDescription(SDMXDataChunk source,
-                                                   Map<String, CodeBean> dimensionSelection)
+    private Collection<Description> getDescription(SdmxVO source)
     {
         final List<Description> descriptions = new LinkedList<>();
 
@@ -338,7 +194,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
         descriptionBuilder.append(source.getEnglishOrFirstName())
         .append('\n');
 
-        for (Map.Entry<String, CodeBean> entry : dimensionSelection.entrySet()) {
+        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
             descriptionBuilder.append(entry.getKey())
             .append(": ")
             .append(entry.getValue().getName())
@@ -356,13 +212,13 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      * Indicator whether there is geo-related information in the dimensions.
      *
      *
-     * @param dimensionSelection the specific selection of dimension + values
+     * @param source value object
      *
      * @return Boolean indicating the availability of geo-related information
      */
-    private boolean hasGeoDimension(Map<String, CodeBean> dimensionSelection)
+    private boolean hasGeoDimension(SdmxVO source)
     {
-        if (dimensionSelection.get(EurostatConstants.GEO_DIMENSION) != null)
+        if (source.getDimensions().get(EurostatConstants.GEO_DIMENSION) != null)
             return true;
 
         return false;
@@ -373,17 +229,16 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      *
      * We only use the name to set geoLocationName
      *
-     * @param dimensionSelection the specific selection of dimension + values
+     * @param source value object
      *
      * @return Collection with one GeoLocation
      */
-    private Collection<GeoLocation> getGeoLocations(
-        Map<String, CodeBean> dimensionSelection)
+    private Collection<GeoLocation> getGeoLocations(SdmxVO source)
     {
         final List<GeoLocation> geoLocations = new LinkedList<>();
         geoLocations.add(
             new GeoLocation(
-                dimensionSelection.get(
+                source.getDimensions().get(
                     EurostatConstants.GEO_DIMENSION).getName()));
         return geoLocations;
     }
@@ -393,17 +248,15 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SDMXDataChu
      *
      * The link to the research data is identical to the identifier of the document
      *
-     * @param source SDMXDataChunk
-     * @param dimensionSelection the specific selection of dimension + values
+     * @param source value object
      *
      * @return Collection with one ResearchData object
      */
-    private Collection<ResearchData> getResearchData(SDMXDataChunk source,
-                                                     Map<String, CodeBean> dimensionSelection)
+    private Collection<ResearchData> getResearchData(SdmxVO source)
     {
         List<ResearchData> researchData = new LinkedList<>();
         researchData.add(new ResearchData(
-                             getIdentifier(source, dimensionSelection),
+                             getIdentifier(source),
                              source.getEnglishOrFirstName()));
         return researchData;
     }

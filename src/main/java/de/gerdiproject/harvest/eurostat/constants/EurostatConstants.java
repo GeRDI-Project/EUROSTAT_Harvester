@@ -15,6 +15,10 @@
  */
 package de.gerdiproject.harvest.eurostat.constants;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -61,4 +65,6 @@ public class EurostatConstants
 
     //MISC
     public static final String GEO_DIMENSION = "GEO";
+    public static final List<String> ALLOWED_DIMENSIONS
+        = Collections.unmodifiableList(Arrays.asList("NA_ITEM", "GEO", "UNIT"));
 }

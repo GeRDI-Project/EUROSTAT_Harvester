@@ -30,6 +30,7 @@ import de.gerdiproject.harvest.config.parameters.StringParameter;
 import de.gerdiproject.harvest.config.parameters.constants.ParameterMappingFunctions;
 import de.gerdiproject.harvest.etls.extractors.EurostatExtractor;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
+import de.gerdiproject.harvest.etls.extractors.SdmxVO;
 import de.gerdiproject.harvest.etls.transformers.EurostatTransformer;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Rights;
@@ -40,7 +41,7 @@ import de.gerdiproject.json.datacite.Rights;
  *
  * @author Tobias Weber
  */
-public class EurostatETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<DataCiteJson>>
+public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
 {
     // URLs
     private StringParameter sdemUrlParam;
@@ -52,8 +53,7 @@ public class EurostatETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<Dat
     private StringParameter rightsNameParam;
     private StringParameter rightsUriParam;
     private StringParameter restBaseUrlParam;
-    private static final List<String> ALLOWED_DIMENSIONS
-        = Collections.unmodifiableList(Arrays.asList("NA_ITEM", "GEO", "UNIT"));
+
     /**
      * Constructor
      */
@@ -64,6 +64,8 @@ public class EurostatETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<Dat
 
     //TODO: add or remove EventListeners?
     //TODO: Do we need createTransformer- or createExtractor-methods.
+
+
 
 
     @Override
@@ -225,15 +227,5 @@ public class EurostatETL extends StaticIteratorETL<SDMXDataChunk, LinkedList<Dat
     public String getRestBaseUrl()
     {
         return this.restBaseUrlParam.getValue();
-    }
-
-    /**
-     * Getter for the allowed SDMX dimensions
-     *
-     * @return the list with names of allowed dimensions
-     */
-    public List<String> getAllowedDimensionNames()
-    {
-        return ALLOWED_DIMENSIONS;
     }
 }
