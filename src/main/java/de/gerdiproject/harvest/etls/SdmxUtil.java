@@ -67,24 +67,24 @@ public class SdmxUtil
             output.add(new HashMap<>());
 
         // fill data
-        int repetitionsBeforeJump = rowCount;
+        int repetitionsPerChunk = rowCount;
 
         for (Map.Entry<K, List<V>> e : inputEntries) {
             final K key = e.getKey();
             final List<V> values = e.getValue();
 
-            //at the beginning of each iteration repetitionsBeforeJump points to
-            //the number of rows that were processed WITHOUT jumping
-            //this will now serve as the information how far we need to jump in this iteration.
-            final int jump = repetitionsBeforeJump;
+            //at the beginning of each iteration repetitionsPerChunk points to the number of rows
+            //that were processed en bloc in the last iteration. 
+            //This will serve as the information how many rows we need to skip after a chunk has been processed.
+            final int skip = repetitionsPerChunk;
 
-            repetitionsBeforeJump /= values.size();
+            repetitionsPerChunk /= values.size();
 
             for (int v = 0; v < values.size(); v++) {
                 final V val = values.get(v);
 
-                for (int offset = v * repetitionsBeforeJump; offset < rowCount; offset += jump)
-                    for (int r = 0; r < repetitionsBeforeJump; r++)
+                for (int offset = v * repetitionsPerChunk; offset < rowCount; offset += skip)
+                    for (int r = 0; r < repetitionsPerChunk; r++)
                         output.get(offset + r).put(key, val);
             }
         }
