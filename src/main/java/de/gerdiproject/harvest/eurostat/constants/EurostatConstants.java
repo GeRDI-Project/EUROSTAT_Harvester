@@ -74,7 +74,7 @@ public class EurostatConstants
 
     public static final String IDENTIFIER_FORMAT = "%s/%s?%s";
 
-    public static final String DESCRIPTION_FORMAT = "%s\n%s";
+    public static final String DESCRIPTION_FORMAT = "%s%n%s";
     public static final char DESCRIPTION_DIMENSION_SEPARATOR = '\n';
 
     public static final String QUERY_PARAM_FORMAT = "%s=%s";
