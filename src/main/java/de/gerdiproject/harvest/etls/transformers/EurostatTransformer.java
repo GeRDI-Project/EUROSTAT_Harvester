@@ -15,6 +15,7 @@
  */
 package de.gerdiproject.harvest.etls.transformers;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -99,23 +100,23 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      */
     private String getIdentifier(SdmxVO source)
     {
-        StringBuilder identifierBuilder = new StringBuilder();
-        identifierBuilder.append(eurostatETL.getRestBaseUrl())
-        .append('/')
-        .append(source.getDataStructureBean().getId())
-        .append('?');
+        StringBuilder queryBuilder = new StringBuilder();
 
         for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
-            identifierBuilder.append(entry.getKey())
-            .append('=')
-            .append(entry.getValue().getName())
-            .append('&');
+            if (queryBuilder.length() != 0)
+                queryBuilder.append(EurostatConstants.QUERY_PARAM_SEPARATOR);
+
+            queryBuilder.append(
+                String.format(EurostatConstants.QUERY_PARAM_FORMAT,
+                              entry.getKey(),
+                              entry.getValue().getName()));
         }
 
-        //delete the last "&"
-        identifierBuilder.setLength(identifierBuilder.length() - 1);
-
-        return identifierBuilder.toString();
+        return String.format(
+                   EurostatConstants.IDENTIFIER_FORMAT,
+                   eurostatETL.getRestBaseUrl(),
+                   source.getDataStructureBean().getId(),
+                   queryBuilder.toString());
     }
 
     /**
@@ -130,24 +131,26 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      */
     private Collection<Title> getTitle(SdmxVO source)
     {
-        final List<Title> titles = new LinkedList<>();
-        StringBuilder titleBuilder = new StringBuilder();
-        titleBuilder.append(source.getEnglishOrFirstName())
-        .append('(');
+        StringBuilder stringBuilder = new StringBuilder();
 
         for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
-            titleBuilder.append(entry.getKey())
-            .append(": ")
-            .append(entry.getValue().getName())
-            .append(", ");
+            if (stringBuilder.length() != 0)
+                stringBuilder.append(EurostatConstants.TITLE_DIMENSION_SEPARATOR);
+
+            final String dimension = String.format(
+                                         EurostatConstants.TITLE_DIMENSION_FORMAT,
+                                         entry.getKey(),
+                                         entry.getValue().getName());
+
+            stringBuilder.append(dimension);
         }
 
-        //delete the last ", "
-        titleBuilder.setLength(titleBuilder.length() - 2);
-        titleBuilder.append(')');
-        titles.add(new Title(titleBuilder.toString()));
+        final String titleString = String.format(
+                                       EurostatConstants.TITLE_FORMAT,
+                                       source.getEnglishOrFirstName(),
+                                       stringBuilder.toString());
 
-        return titles;
+        return Arrays.asList(new Title(titleString));
     }
 
     /**
@@ -182,24 +185,28 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      */
     private Collection<Description> getDescription(SdmxVO source)
     {
-        final List<Description> descriptions = new LinkedList<>();
-
-        StringBuilder descriptionBuilder = new StringBuilder();
-        descriptionBuilder.append(source.getEnglishOrFirstName())
-        .append('\n');
+        StringBuilder stringBuilder = new StringBuilder();
 
         for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
-            descriptionBuilder.append(entry.getKey())
-            .append(": ")
-            .append(entry.getValue().getName())
-            .append(", ");
+            if (stringBuilder.length() != 0)
+                stringBuilder.append(EurostatConstants.DESCRIPTION_DIMENSION_SEPARATOR);
+
+            final String dimension = String.format(
+                                         EurostatConstants.TITLE_DIMENSION_FORMAT,
+                                         entry.getKey(),
+                                         entry.getValue().getName());
+
+            stringBuilder.append(dimension);
         }
 
-        descriptions.add(new Description(
-                             descriptionBuilder.toString(),
-                             DescriptionType.Abstract));
+        final String descriptionString = String.format(
+                                             EurostatConstants.DESCRIPTION_FORMAT,
+                                             source.getEnglishOrFirstName(),
+                                             stringBuilder.toString());
 
-        return descriptions;
+        return Arrays.asList(new Description(
+                                 descriptionString,
+                                 DescriptionType.Abstract));
     }
 
     /**

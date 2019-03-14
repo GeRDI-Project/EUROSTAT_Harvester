@@ -67,4 +67,16 @@ public class EurostatConstants
     public static final String GEO_DIMENSION = "GEO";
     public static final List<String> ALLOWED_DIMENSIONS
         = Collections.unmodifiableList(Arrays.asList("NA_ITEM", "GEO", "UNIT"));
+
+    public static final String TITLE_FORMAT = "%s (%s)";
+    public static final String TITLE_DIMENSION_FORMAT = "%s: %s";
+    public static final String TITLE_DIMENSION_SEPARATOR = ", ";
+
+    public static final String IDENTIFIER_FORMAT = "%s/%s?%s";
+
+    public static final String DESCRIPTION_FORMAT = "%s\n%s";
+    public static final char DESCRIPTION_DIMENSION_SEPARATOR = '\n';
+
+    public static final String QUERY_PARAM_FORMAT = "%s=%s";
+    public static final char QUERY_PARAM_SEPARATOR = '&';
 }
