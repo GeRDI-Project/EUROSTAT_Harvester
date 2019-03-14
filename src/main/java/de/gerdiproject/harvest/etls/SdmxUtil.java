@@ -54,58 +54,41 @@ public class SdmxUtil
     {
         final Set<Map.Entry<K, List<V>>> inputEntries = input.entrySet();
 
-        // calculate the number of list entries in the output list
-        int outputListSize = 1;
+        // calculate number of rows
+        int rowCount = 1;
 
         for (Map.Entry<K, List<V>> e : inputEntries)
-            outputListSize *= e.getValue().size();
+            rowCount *= e.getValue().size();
 
         // initialize all maps
-        final List<Map<K, V>> outputList = new ArrayList<>(outputListSize);
+        final List<Map<K, V>> output = new ArrayList<>(rowCount);
 
-        for (int i = 0; i < outputListSize; i++)
-            outputList.add(new HashMap<>());
+        for (int i = 0; i < rowCount; i++)
+            output.add(new HashMap<>());
 
         // fill data
-        int numberOfSeenCombinations = 1;
+        int repetitionsBeforeJump = rowCount;
 
         for (Map.Entry<K, List<V>> e : inputEntries) {
             final K key = e.getKey();
             final List<V> values = e.getValue();
-            final int numberOfValueOccurrences = outputListSize / values.size();
 
-            for (int valueIndex = 0; valueIndex < values.size(); valueIndex++) {
-                final V val = values.get(valueIndex);
+            //at the beginning of each iteration repetitionsBeforeJump points to
+            //the number of rows that were processed WITHOUT jumping
+            //this will now serve as the information how far we need to jump in this iteration.
+            final int jump = repetitionsBeforeJump;
 
-                for (int repeated = 0; repeated < numberOfValueOccurrences; repeated++) {
-                    int insertAt = getPosition(repeated, valueIndex, numberOfSeenCombinations, values.size());
-                    outputList.get(insertAt).put(key, val);
-                }
+            repetitionsBeforeJump /= values.size();
+
+            for (int v = 0; v < values.size(); v++) {
+                final V val = values.get(v);
+
+                for (int offset = v * repetitionsBeforeJump; offset < rowCount; offset += jump)
+                    for (int r = 0; r < repetitionsBeforeJump; r++)
+                        output.get(offset + r).put(key, val);
             }
-
-            numberOfSeenCombinations *= values.size();
         }
 
-        return outputList;
-    }
-
-    /**
-     * Gets the position in a list in which the repeatedth occurrence of value
-     * with valueIndex has to be inserted, given that we already iterated over
-     * numberOfSeenCombinations and that the current dimension has
-     * sizeOfCurrentDimension elements.
-     *
-     * @param repeated how often the value has been inserted yet
-     * @param valueIndex the position of the value in the current dimension
-     * @param numberOfSeenCombinations the number of combinations already seen
-     * @param sizeOfCurrentDimension the size of the current dimension
-     *
-     * @return position in the list in which the repeatedth occurrence has to be inserted
-     */
-    public static int getPosition(int repeated, int valueIndex, int numberOfSeenCombinations, int sizeOfCurrentDimension)
-    {
-        int remainder = repeated % numberOfSeenCombinations;
-        int quotient = repeated / numberOfSeenCombinations;
-        return valueIndex * numberOfSeenCombinations + quotient * numberOfSeenCombinations * sizeOfCurrentDimension + remainder;
+        return output;
     }
 }
