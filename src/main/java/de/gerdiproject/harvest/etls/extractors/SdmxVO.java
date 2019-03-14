@@ -25,7 +25,7 @@ import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 
 /**
  * This class is a value object that contains all extracted (meta-) data from
- * Eurostat that is requrired to generate a document.
+ * Eurostat that is required to generate a document.
  *
  * @author Tobias Weber
  */
@@ -63,7 +63,7 @@ public class SdmxVO
     /**
      * Get the English name, if it exists, if not pick the first one
      *
-     * @return containing the name of the Dataflow, which the SDMXDataChunkdescribes
+     * @return containing the name of the Dataflow, which the SdmxVO describes
      */
     public String getEnglishOrFirstName()
     {
