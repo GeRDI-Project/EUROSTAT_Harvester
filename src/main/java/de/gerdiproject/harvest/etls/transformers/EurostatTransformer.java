@@ -58,9 +58,9 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
     /**
      * Returns a DataCiteJson for a given dimension selection.
      *
-     * Will be called multiple times for one SDMXDataChunk.
+     * Will be called multiple times for one SdmxVO
      *
-     * @param source SDMXDataChunk (for global information)
+     * @param source SdmxVO (for global information)
      * @param dimensionSelection the specific selection of dimension + values
      *
      * @return The DataCiteJSON document

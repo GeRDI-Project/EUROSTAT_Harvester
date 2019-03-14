@@ -39,11 +39,12 @@ import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
+import de.gerdiproject.harvest.etls.SdmxUtil;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
- * (meta-)data from Eurostat and bundles it into a {@linkplain SDMXDataChunk}.
+ * (meta-)data from Eurostat and bundles it into a {@linkplain SdmxVO}.
  *
  * @author Tobias Weber
  */
@@ -85,7 +86,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
     /**
      * Get a list of dimension values which are both configured and present in the data structure
      *
-     * @param the SDMXDataChunk in question
+     * @param the SdmxVO in question
      *
      * @return a list of all possible combinations of codes of each allowed and present dimension
      */
@@ -102,18 +103,14 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
                 input.put(id, getCodeList(dataStructureBean, id));
         }
 
-        //Build a list of all possible combination of values of each dimension.
-        return combineDimensions(0,
-                                 input,
-                                 new HashMap<String, CodeBean>(),
-                                 new LinkedList <Map<String, CodeBean>>()
-                                );
+        //Build a list of all possible combinations of values of each dimension.
+        return SdmxUtil.mapOfListsToListOfMaps(input);
     }
 
     /**
      * Get a list of all Codes given a dimensionId
      *
-     * @param source the SDMXDataChunk to be searched
+     * @param source the SdmxVO to be searched
      * @param dimensionId the ID of the dimension to be iterated over
      *
      * @return A list of all code values for the dimension in source
@@ -138,76 +135,6 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
             codes.add((CodeBean) code);
 
         return codes;
-    }
-
-    /**
-     * This function transforms a map of n sets of Strings with arbitrary lengths
-     * to a set of maps with n key/value pairs, comprising all possible combinations
-     * of the elements of the input maps.
-     *
-     * Example:
-     * Input: { "article":  ["a", "the"],
-     *          "adjective: ["fat"],
-     *          "noun": ["cop", "god", "cod"] }
-     * Output: [
-     *          { "article" : "a",   "adjective" : "fat", "noun" : "cop" },
-     *          { "article" : "a",   "adjective" : "fat", "noun" : "god" },
-     *          { "article" : "a",   "adjective" : "fat", "noun" : "cod" },
-     *          { "article" : "the", "adjective" : "fat", "noun" : "cop" },
-     *          { "article" : "the", "adjective" : "fat", "noun" : "god" },
-     *          { "article" : "the", "adjective" : "fat", "noun" : "cod" },
-     *
-     * We use recursion to traverse to each leaf of this tree
-     *
-     *                  |
-     *         ------------------
-     *        "a"              "the"
-     *         |                 |
-     *       "fat"             "fat"
-     *         |                 |
-     *   -------------     -------------
-     *   |     |     |     |     |     |
-     * "cop" "god" "cod" "cop" "god" "cod"
-     *
-     * Idea for this implementation:
-     * https://stackoverflow.com/questions/8173862/map-of-sets-into-list-of-all-combinations
-     *
-     * @param level tracks the current level in the tree or number of recursions happened.
-     * @param input Map with the Sets to be combined
-     * @param currentRow the current combination that is assembled
-     * @param output intermediate list of combinations to be calculated (manage state among recursions)
-     *
-     * @return list of combinations of the element of the input maps
-     */
-
-    public static List<Map <String, CodeBean>> combineDimensions(
-        int level,
-        Map<String, List <CodeBean>> input,
-        Map<String, CodeBean> currentRow,
-        List<Map <String, CodeBean>> output)
-    {
-        if (level == input.size()) { //all dimensions were visited -> we have reached a leaf
-            // deep copy of current, because Java sucks at doing this natively
-            Map<String, CodeBean> newMap = new HashMap<String, CodeBean>();
-
-            for (Map.Entry<String, CodeBean> entry : currentRow.entrySet())
-                newMap.put(entry.getKey(), entry.getValue());
-
-            output.add(newMap);
-            return output;
-        } else { //we have not visited a leaf, so we need to iterate over all values of this level
-            String dimension = (String) input.keySet().toArray()[level];
-
-            for (CodeBean codeBean : input.get(dimension)) {
-                currentRow.put(dimension, codeBean);
-                output = combineDimensions(level + 1, input, currentRow, output);
-                // After a leaf was visited we remove the key
-                // (otherwise the current key/value-pair would be part of all rows added to the output).
-                currentRow.remove(dimension);
-            }
-        }
-
-        return output;
     }
 
 
