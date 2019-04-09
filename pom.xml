@@ -6,11 +6,11 @@
 	<parent>
 		<groupId>de.gerdi-project</groupId>
 		<artifactId>GeRDI-parent-harvester</artifactId>
-		<version>7.3.5-SNAPSHOT</version>
+		<version>7.3.5</version>
 	</parent>
 	
 	<artifactId>EUROSTAT-HarvesterService</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>7.3.5</version>
     <packaging>war</packaging>
 	<name>EUROSTAT Harvester Service</name>
 	<description>This is a restful harvester for retrieving data from https://ec.europa.eu/eurostat</description>
