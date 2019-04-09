@@ -74,7 +74,7 @@ public class SdmxUtil
             final List<V> values = e.getValue();
 
             //at the beginning of each iteration repetitionsPerChunk points to the number of rows
-            //that were processed en bloc in the last iteration. 
+            //that were processed en bloc in the last iteration.
             //This will serve as the information how many rows we need to skip after a chunk has been processed.
             final int skip = repetitionsPerChunk;
 
