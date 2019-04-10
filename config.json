@@ -1,0 +1,6 @@
+{ 
+    "EurostatETL.logoUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png",
+    "EurostatETL.rangeTo": 10,
+    "Submission.Loader": "DiskLoader",
+    "Submission.url": "file:/var/lib/jetty/cache/records/data.json"
+} 

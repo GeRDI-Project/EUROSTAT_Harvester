@@ -34,13 +34,29 @@ import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
 import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 import org.sdmxsource.sdmx.api.model.beans.reference.StructureReferenceBean;
-import org.sdmxsource.sdmx.structureparser.manager.parsing.impl.StructureParsingManagerImpl;
+import org.sdmxsource.sdmx.api.manager.parse.StructureParsingManager;
 import org.sdmxsource.util.io.ReadableDataLocationTmp;
 
+
+import org.sdmxsource.sdmx.api.model.ResolutionSettings;
+import org.sdmxsource.sdmx.api.model.ResolutionSettings.RESOLVE_EXTERNAL_SETTING;
+import org.sdmxsource.sdmx.api.model.ResolutionSettings.RESOLVE_CROSS_REFERENCES;
+import org.sdmxsource.sdmx.structureretrieval.manager.RESTSdmxBeanRetrievalManager;
+import org.sdmxsource.util.factory.SdmxSourceReadableDataLocationFactory;
+import org.sdmxsource.sdmx.api.manager.retrieval.SdmxBeanRetrievalManager;
+import org.sdmxsource.sdmx.api.util.ReadableDataLocation;
+import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataflowSuperBean;
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
 import de.gerdiproject.harvest.etls.SdmxUtil;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
+import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+import org.springframework.context.support.ClassPathXmlApplicationContext; 
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
@@ -52,16 +68,43 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 {
     private String version = null;
     private int size = -1;
-    private StructureParsingManagerImpl parser = new StructureParsingManagerImpl();
+
+
+    private StructureParsingManager parser;
+
     private StructureWorkspace sdem = null;
+
+    private SdmxSourceReadableDataLocationFactory rdlFactory;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EurostatExtractor.class);
 
     @Override
     public void init(AbstractETL<?, ?> etl)
     {
         super.init(etl);
-
         final EurostatETL eurostatEtl = (EurostatETL) etl;
-        sdem = parser.parseStructures(new ReadableDataLocationTmp(eurostatEtl.getSdemUrl()));
+
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/beans.xml");
+        rdlFactory = (SdmxSourceReadableDataLocationFactory) context.getBean("readableDataLocationFactory");
+        try {
+            ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(eurostatEtl.getSdemUrl());
+            parser = (StructureParsingManager) context.getBean("structureParsingManager");
+            sdem = parser.parseStructures(rdl);
+
+            //THIS DOES NOT WORK! IT THROWS A NULLPOINTEREXCEPTION WHY? 
+            //IT FAILS SINCE: at org.sdmxsource.sdmx.structureparser.manager.parsing.impl.StructureParsingManagerImpl.getStructureParserFactory(StructureParsingManagerImpl.java:98)
+            //THERE IS NO FACTORY
+            //SO WE NEED TO PROVIDE CONTEXT
+            //sdem = parser.parseStructures(rdl, rs, rm); 
+
+
+        } catch (Exception e) {
+            LOGGER.warn("SOMETHING GOT AWEFULLY WRONG!");
+            LOGGER.info(e.getMessage());
+            e.printStackTrace();
+            LOGGER.info(e.toString());
+            throw e;
+        }
         version = sdem.getStructureBeans(false).getHeader().getId();
     }
 
@@ -80,7 +123,9 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
     @Override
     protected Iterator<SdmxVO> extractAll() throws ExtractorException
     {
-        return new EurostatIterator(this.sdem.getStructureBeans(false).getDataflows());
+        return new EurostatIterator(this.sdem.getStructureBeans(false).getDataflows(),
+                this.rdlFactory,
+                this.parser);
     }
 
     /**
@@ -148,15 +193,21 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
     {
         private Queue<DataflowBean> dataflows = new LinkedList<>();
         private Queue<SdmxVO> chunkedDataflow = new LinkedList<>();
+        private SdmxSourceReadableDataLocationFactory rdlFactory;
+        private StructureParsingManager parser;
 
         /**
          * Adds a set of DataflowBeans to the harvest queue
          *
          * @param dataflows set of DataflowBeans to be added to the queue
          */
-        public EurostatIterator(Set<DataflowBean> dataflows)
+        public EurostatIterator(Set<DataflowBean> dataflows,
+                SdmxSourceReadableDataLocationFactory rdlFactory,
+                StructureParsingManager parser)
         {
-            dataflows.addAll(dataflows);
+            this.dataflows.addAll(dataflows);
+            this.rdlFactory = rdlFactory;
+            this.parser = parser;
         }
 
         @Override
@@ -167,25 +218,37 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
         @Override
         public SdmxVO next()
-        {
+        { 
             if (chunkedDataflow.isEmpty()) {
                 final DataflowBean dataflowBean = dataflows.remove();
-                StructureReferenceBean structureReferenceBean
-                    = dataflowBean.getDataStructureRef().createMutableInstance();
+                String dataStructureId = dataflowBean.getDataStructureRef().getMaintainableId();
+                String url ="http://ec.europa.eu/eurostat/SDMX/diss-web/rest/datastructure/ESTAT/" + dataStructureId;
+                LOGGER.warn(url);
+                ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(url);
+                StructureWorkspace workspace = parser.parseStructures(rdl);
+                DataStructureSuperBean dataStructureSuperBean =
+                    (DataStructureSuperBean) workspace.getSuperBeans()
+                        .getDataStructures().toArray()[0];
+                DataStructureBean dataStructureBean = dataStructureSuperBean.getBuiltFrom();
 
-                if (structureReferenceBean.getMaintainableStructureType()
-                    == SDMX_STRUCTURE_TYPE.DATASOURCE) {
-                    DataStructureBean dataStructureBean =
-                        (DataStructureBean) structureReferenceBean.getMaintainableReference();
+                    
+
+                //LOGGER.warn(structureReferenceBean.getTargetStructureType().toString());
+
+
+
+
+
+                    LOGGER.warn("AFTER RETRIEVAL");
 
                     for (Map<String, CodeBean> dimensionCombination :
-                         getDimensionCombinations(dataStructureBean)) {
+                        getDimensionCombinations(dataStructureBean)) {
                         chunkedDataflow.add(new SdmxVO(
                                                 dataflowBean.getNames(),
                                                 dataStructureBean,
                                                 dimensionCombination));
                     }
-                }
+
             }
 
             return chunkedDataflow.remove();
