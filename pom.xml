@@ -6,15 +6,22 @@
 	<parent>
 		<groupId>de.gerdi-project</groupId>
 		<artifactId>GeRDI-parent-harvester</artifactId>
-		<version>7.3.1-SNAPSHOT</version>
+		<version>7.3.5</version>
 	</parent>
 	
 	<artifactId>EUROSTAT-HarvesterService</artifactId>
+    <version>7.3.5</version>
     <packaging>war</packaging>
 	<name>EUROSTAT Harvester Service</name>
 	<description>This is a restful harvester for retrieving data from https://ec.europa.eu/eurostat</description>
 	<inceptionYear>2019</inceptionYear>
   
+    <properties>
+        <sdmxsource.version>1.5.6.2</sdmxsource.version>
+        <pmd.plugin.version>3.10.0</pmd.plugin.version>
+        <spring.version>3.0.5.RELEASE</spring.version>
+    </properties>
+
 	<developers>
 		<developer>
 			<name>Tobias Weber</name>
@@ -23,12 +30,34 @@
 			<organizationUrl>https://www.lrz.de</organizationUrl>
 		</developer>
 	</developers>
-	
+    
+	<dependencies>		
+        <dependency>
+            <groupId>org.sdmxsource</groupId>
+            <artifactId>SdmxStructureParser</artifactId>
+            <version>${sdmxsource.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+	</dependencies>
+
 	<!-- Define Sonatype repository for retrieving SNAPSHOT versions -->
 	<repositories>
 		<repository>
 			<id>Sonatype</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</repository>
+        </repository>
+        <repository>
+            <id>MTRepo</id>
+            <url>http://sdmxsource.metadatatechnology.com/nexus/content/repositories/releases</url>
+        </repository>
 	</repositories>
 </project>
