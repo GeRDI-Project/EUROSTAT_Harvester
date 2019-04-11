@@ -67,8 +67,11 @@ public class EurostatConstants
 
     //MISC
     public static final String GEO_DIMENSION = "GEO";
-    public static final List<String> ALLOWED_DIMENSIONS
-        = Collections.unmodifiableList(Arrays.asList("NA_ITEM", "GEO", "UNIT", "FREQ", "INDICATORS", "PARTNER"));
+    public static final String ALLOWED_DIMENSIONS_KEY = "allowedDimensions";
+    public static final String ALLOWED_DIMENSIONS_DEFAULT_VALUE = "NA_ITEM,GEO,UNIT,FREQ,INDICATORS,PARTNER";
+
+    public static final String DATA_PRODUCT_REGEX_KEY = "dataProductRegex";
+    public static final String DATA_PRODUCT_REGEX_DEFAULT_VALUE = "DSD_.*"; 
 
     public static final String TITLE_FORMAT = "%s (%s)";
     public static final String TITLE_DIMENSION_FORMAT = "%s: %s";

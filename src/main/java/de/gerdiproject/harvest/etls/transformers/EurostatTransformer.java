@@ -15,6 +15,8 @@
  */
 package de.gerdiproject.harvest.etls.transformers;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -112,11 +114,17 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
                               entry.getValue().getName()));
         }
 
-        return String.format(
+        String urlAsString = String.format(
                    EurostatConstants.IDENTIFIER_FORMAT,
                    eurostatETL.getRestBaseUrl(),
                    source.getDataStructureBean().getId().replaceFirst("DSD_", ""),
                    queryBuilder.toString());
+
+        try {
+            return URLEncoder.encode(urlAsString, "UTF-8");
+        } catch ( UnsupportedEncodingException e ) {
+            return urlAsString;
+        }
     }
 
     /**
