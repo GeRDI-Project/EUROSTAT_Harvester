@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import org.sdmxsource.sdmx.api.exception.SdmxException;
 import org.sdmxsource.sdmx.api.manager.parse.StructureParsingManager;
 import org.sdmxsource.sdmx.api.model.StructureWorkspace;
 import org.sdmxsource.sdmx.api.model.beans.base.SDMXBean;
@@ -34,6 +35,8 @@ import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
 import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
+import org.sdmxsource.sdmx.api.model.superbeans.codelist.CodeSuperBean;
+import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DimensionSuperBean;
 import org.sdmxsource.sdmx.api.util.ReadableDataLocation;
 import org.sdmxsource.util.factory.SdmxSourceReadableDataLocationFactory;
 
@@ -44,7 +47,8 @@ import de.gerdiproject.harvest.etls.EurostatETL;
 import de.gerdiproject.harvest.etls.SdmxUtil;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
@@ -61,6 +65,8 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
     private StructureParsingManager parser;
     private StructureWorkspace sdem;
     private SdmxSourceReadableDataLocationFactory rdlFactory;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EurostatExtractor.class);
 
     @Override
     public void init(AbstractETL<?, ?> etl)
@@ -106,17 +112,17 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
      *
      * @return a list of all possible combinations of codes of each allowed and present dimension
      */
-    public static List<Map<String, CodeBean>> getDimensionCombinations(
-        DataStructureBean dataStructureBean)
+    public static List<Map<String, CodeSuperBean>> getDimensionCombinations(
+        DataStructureSuperBean dataStructureSuperBean)
     {
-        HashMap<String, List<CodeBean>> input = new HashMap<String, List<CodeBean>>();
+        HashMap<String, List<CodeSuperBean>> input = new HashMap<String, List<CodeSuperBean>>();
 
         // get all dimensions that are allowed AND existent in source
-        for (DimensionBean dimensionBean : dataStructureBean.getDimensions()) {
-            final String id = dimensionBean.getId();
+        for (DimensionSuperBean dimensionSuperBean : dataStructureSuperBean.getDimensions()) {
+            final String id = dimensionSuperBean.getId();
 
             if (EurostatConstants.ALLOWED_DIMENSIONS.contains(id))
-                input.put(id, getCodeList(dataStructureBean, id));
+                input.put(id, getCodeList(dataStructureSuperBean, id));
         }
 
         //Build a list of all possible combinations of values of each dimension.
@@ -131,24 +137,16 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
      *
      * @return A list of all code values for the dimension in source
      */
-    public static List<CodeBean> getCodeList(
-        DataStructureBean dataStructureBean, String dimensionId)
+    public static List<CodeSuperBean> getCodeList(
+        DataStructureSuperBean dataStructureSuperBean, String dimensionId)
     {
-        LinkedList<CodeBean> codes = new LinkedList<CodeBean>();
+        LinkedList<CodeSuperBean> codes = new LinkedList<CodeSuperBean>();
 
-        DimensionBean dimensionBean = dataStructureBean.getDimension(dimensionId);
-        List<CrossReferenceBean> conceptRole = dimensionBean.getConceptRole();
-        ConceptBean conceptBean
-            = (ConceptBean) conceptRole.get(0).createMutableInstance().getMaintainableReference();
+        DimensionSuperBean dimensionSuperBean = dataStructureSuperBean
+                                                .getDimensionById(dimensionId);
 
-        CodelistBean codeListBean
-            = (CodelistBean) conceptBean.getCoreRepresentation()
-              .getRepresentation()
-              .createMutableInstance()
-              .getMaintainableReference();
-
-        for (SDMXBean code : codeListBean.getItems())
-            codes.add((CodeBean) code);
+        for (CodeSuperBean code : dimensionSuperBean.getCodelist(true).getCodes())
+            codes.add(code);
 
         return codes;
     }
@@ -158,7 +156,6 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
      * This iterator iterates over all dataflows in the sdem and retrieves the
      * sdmx value objects.
      *
-     * @author Tobias Weber
      */
     private static class EurostatIterator implements Iterator<SdmxVO>
     {
@@ -176,6 +173,13 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
                                 SdmxSourceReadableDataLocationFactory rdlFactory,
                                 StructureParsingManager parser)
         {
+            //Please keep for debugging reasons (no time to parametrize this
+            //dataflows.forEach((d) -> {
+            //    LOGGER.info(String.format("'%s'", d.getDataStructureRef().getMaintainableId()));
+            //    if (d.getDataStructureRef().getMaintainableId().matches("DSD_t2020.*"))
+            //        this.dataflows.add(d);
+            //});
+
             this.dataflows.addAll(dataflows);
             this.rdlFactory = rdlFactory;
             this.parser = parser;
@@ -191,31 +195,48 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         public SdmxVO next()
         {
             if (chunkedDataflow.isEmpty()) {
-                //According to the documentation, the "right" way to retrieve all the DataStructures
-                //would be via a parseStructures(rdl, rds, rdm)-call that uses RESTSdmxBeanRetrievalManager
-                //in init(). Unfortunately the RESTSdmxBeanRetrievalManager is throwing
-                //NullPointerExceptions. This is a workaround until the problem could be solved
-                //or the source code is available to see WHY these exceptions are thrown.
                 final DataflowBean dataflowBean = dataflows.remove();
-                String url = String.format(EurostatConstants.SDMX_BASE_URL_FORMAT,
-                                           dataflowBean.getDataStructureRef().getMaintainableId());
-                ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(url);
-                StructureWorkspace workspace = parser.parseStructures(rdl);
+                try {
+                    //According to the documentation, the "right" way to retrieve all the
+                    //DataStructures would be via a parseStructures(rdl, rds, rdm)-call
+                    //that uses RESTSdmxBeanRetrievalManager in init().
+                    //Unfortunately the RESTSdmxBeanRetrievalManager is throwing
+                    //NullPointerExceptions. This is a workaround until the problem could be solved
+                    //or the source code is available to see WHY these exceptions are thrown.
 
-                DataStructureSuperBean dataStructureSuperBean =
-                    (DataStructureSuperBean) workspace.getSuperBeans()
-                    .getDataStructures().toArray()[0];
-                DataStructureBean dataStructureBean = dataStructureSuperBean.getBuiltFrom();
+                    String url = String.format(EurostatConstants.SDMX_BASE_URL_FORMAT,
+                                               dataflowBean.getDataStructureRef().getMaintainableId());
+                    LOGGER.debug(url);
+                    ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(url);
+                    StructureWorkspace workspace = parser.parseStructures(rdl);
 
-                //get all dimensions from the DataStructureBean, filling up chunkedDataflow
-                for (Map<String, CodeBean> dimensionCombination :
-                     getDimensionCombinations(dataStructureBean)) {
-                    chunkedDataflow.add(new SdmxVO(
-                                            dataflowBean.getNames(),
-                                            dataStructureBean,
-                                            dimensionCombination));
+                    DataStructureSuperBean dataStructureSuperBean =
+                        (DataStructureSuperBean) workspace.getSuperBeans()
+                        .getDataStructures().toArray()[0];
+                    DataStructureBean dataStructureBean = dataStructureSuperBean.getBuiltFrom();
+
+                    //get all dimensions from the DataStructureBean, filling up chunkedDataflow
+                    for (Map<String, CodeSuperBean> dimensionCombination :
+                         getDimensionCombinations(dataStructureSuperBean)) {
+
+                        Map<String, CodeBean> convertedDimensionCombination
+                            = new HashMap<String, CodeBean>();
+
+                        for (Map.Entry<String, CodeSuperBean> entry : dimensionCombination.entrySet())
+                            convertedDimensionCombination.put(entry.getKey(), entry.getValue().getBuiltFrom());
+
+                        chunkedDataflow.add(new SdmxVO(
+                                                dataflowBean.getNames(),
+                                                dataStructureBean,
+                                                convertedDimensionCombination));
+                    }
+
+                } catch (SdmxException e) {
+                    LOGGER.warn(String.format("Ignoring %s",
+                                dataflowBean.getDataStructureRef().getMaintainableId()));
+                    LOGGER.warn(e.getMessage());
+                    return next();
                 }
-
             }
 
             return chunkedDataflow.remove();

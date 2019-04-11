@@ -37,7 +37,7 @@ public class EurostatConstants
         = "http://ec.europa.eu/eurostat/SDMX/diss-web/rest/dataflow/ESTAT/all/latest";
     public static final String REST_URL_BASE_KEY = "restUrlBase";
     public static final String REST_URL_BASE_DEFAULT_VALUE
-        = "http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/";
+        = "http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en";
     public static final String LOGO_URL_KEY = "logoUrl";
     public static final String LOGO_URL_DEFAULT_VALUE = "";
 
@@ -68,7 +68,7 @@ public class EurostatConstants
     //MISC
     public static final String GEO_DIMENSION = "GEO";
     public static final List<String> ALLOWED_DIMENSIONS
-        = Collections.unmodifiableList(Arrays.asList("NA_ITEM", "GEO", "UNIT"));
+        = Collections.unmodifiableList(Arrays.asList("NA_ITEM", "GEO", "UNIT", "FREQ", "INDICATORS", "PARTNER"));
 
     public static final String TITLE_FORMAT = "%s (%s)";
     public static final String TITLE_DIMENSION_FORMAT = "%s: %s";
