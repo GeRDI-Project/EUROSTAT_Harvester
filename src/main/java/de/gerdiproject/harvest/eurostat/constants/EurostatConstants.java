@@ -41,6 +41,8 @@ public class EurostatConstants
     public static final String LOGO_URL_KEY = "logoUrl";
     public static final String LOGO_URL_DEFAULT_VALUE = "";
 
+    public static final String SDMX_BASE_URL_FORMAT
+        = "http://ec.europa.eu/eurostat/SDMX/diss-web/rest/datastructure/ESTAT/%s";
 
     // Metadata default values
     public static final String PUBLISHER_KEY = "publisher";
@@ -79,4 +81,6 @@ public class EurostatConstants
 
     public static final String QUERY_PARAM_FORMAT = "%s=%s";
     public static final char QUERY_PARAM_SEPARATOR = '&';
+
+
 }
