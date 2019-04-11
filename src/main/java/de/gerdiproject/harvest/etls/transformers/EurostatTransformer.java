@@ -115,7 +115,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
         return String.format(
                    EurostatConstants.IDENTIFIER_FORMAT,
                    eurostatETL.getRestBaseUrl(),
-                   source.getDataStructureBean().getId(),
+                   source.getDataStructureBean().getId().replaceFirst("DSD_", ""),
                    queryBuilder.toString());
     }
 
