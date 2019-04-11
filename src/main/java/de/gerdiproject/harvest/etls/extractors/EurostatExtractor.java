@@ -26,14 +26,9 @@ import java.util.Set;
 import org.sdmxsource.sdmx.api.exception.SdmxException;
 import org.sdmxsource.sdmx.api.manager.parse.StructureParsingManager;
 import org.sdmxsource.sdmx.api.model.StructureWorkspace;
-import org.sdmxsource.sdmx.api.model.beans.base.SDMXBean;
 import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
-import org.sdmxsource.sdmx.api.model.beans.codelist.CodelistBean;
-import org.sdmxsource.sdmx.api.model.beans.conceptscheme.ConceptBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
-import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
-import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
 import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.codelist.CodeSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DimensionSuperBean;
@@ -196,6 +191,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         {
             if (chunkedDataflow.isEmpty()) {
                 final DataflowBean dataflowBean = dataflows.remove();
+
                 try {
                     //According to the documentation, the "right" way to retrieve all the
                     //DataStructures would be via a parseStructures(rdl, rds, rdm)-call
@@ -233,7 +229,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
                 } catch (SdmxException e) {
                     LOGGER.warn(String.format("Ignoring %s",
-                                dataflowBean.getDataStructureRef().getMaintainableId()));
+                                              dataflowBean.getDataStructureRef().getMaintainableId()));
                     LOGGER.warn(e.getMessage());
                     return next();
                 }
