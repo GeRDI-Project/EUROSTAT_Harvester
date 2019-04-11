@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import org.sdmxsource.sdmx.api.manager.parse.StructureParsingManager;
 import org.sdmxsource.sdmx.api.model.StructureWorkspace;
 import org.sdmxsource.sdmx.api.model.beans.base.SDMXBean;
 import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
@@ -32,26 +33,18 @@ import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DimensionBean;
 import org.sdmxsource.sdmx.api.model.beans.reference.CrossReferenceBean;
-import org.sdmxsource.sdmx.api.model.beans.reference.StructureReferenceBean;
-import org.sdmxsource.sdmx.api.manager.parse.StructureParsingManager;
-
-
-
-
-
-import org.sdmxsource.util.factory.SdmxSourceReadableDataLocationFactory;
+import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
 import org.sdmxsource.sdmx.api.util.ReadableDataLocation;
+import org.sdmxsource.util.factory.SdmxSourceReadableDataLocationFactory;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
 import de.gerdiproject.harvest.etls.SdmxUtil;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
-import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
@@ -68,8 +61,6 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
     private StructureParsingManager parser;
     private StructureWorkspace sdem;
     private SdmxSourceReadableDataLocationFactory rdlFactory;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EurostatExtractor.class);
 
     @Override
     public void init(AbstractETL<?, ?> etl)
