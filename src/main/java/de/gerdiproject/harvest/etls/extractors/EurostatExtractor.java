@@ -119,6 +119,11 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
             final String id = dimensionSuperBean.getId();
 
             if (etl.getAllowedDimensions().contains(id))
+                LOGGER.debug(String.format("%s is an allowed dimension", id));
+
+            List<CodeSuperBean> codeList = getCodeList(dataStructureSuperBean, id);
+
+            if (codeList.size() > 0)
                 input.put(id, getCodeList(dataStructureSuperBean, id));
         }
 
@@ -142,8 +147,12 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         DimensionSuperBean dimensionSuperBean = dataStructureSuperBean
                                                 .getDimensionById(dimensionId);
 
-        for (CodeSuperBean code : dimensionSuperBean.getCodelist(true).getCodes())
-            codes.add(code);
+        try {
+            for (CodeSuperBean code : dimensionSuperBean.getCodelist(true).getCodes())
+                codes.add(code);
+        } catch (NullPointerException e) {
+            LOGGER.warn(String.format("No Codes for %s, will be ignored!", dimensionId));
+        }
 
         return codes;
     }
@@ -171,7 +180,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
                                 SdmxSourceReadableDataLocationFactory rdlFactory,
                                 StructureParsingManager parser,
                                 EurostatETL etl)
-        { 
+        {
 
             this.rdlFactory = rdlFactory;
             this.parser = parser;
@@ -179,14 +188,14 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
             dataflows.forEach((d) -> {
                 if (d.getDataStructureRef().getMaintainableId().matches(
-                            this.etl.getDataProductRegex())) 
+                        this.etl.getDataProductRegex()))
                 {
                     LOGGER.info(String.format("Will process '%s'",
-                                d.getDataStructureRef().getMaintainableId()));
+                                              d.getDataStructureRef().getMaintainableId()));
                     this.dataflows.add(d);
                 }
             });
-            
+
         }
 
         @Override

@@ -111,20 +111,16 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
             queryBuilder.append(
                 String.format(EurostatConstants.QUERY_PARAM_FORMAT,
                               entry.getKey(),
-                              entry.getValue().getName()));
+                              entry.getValue().getId()));
         }
 
-        String urlAsString = String.format(
+        String queryString = queryBuilder.toString();
+
+        return String.format(
                    EurostatConstants.IDENTIFIER_FORMAT,
                    eurostatETL.getRestBaseUrl(),
                    source.getDataStructureBean().getId().replaceFirst("DSD_", ""),
-                   queryBuilder.toString());
-
-        try {
-            return URLEncoder.encode(urlAsString, "UTF-8");
-        } catch ( UnsupportedEncodingException e ) {
-            return urlAsString;
-        }
+                   queryString);
     }
 
     /**
@@ -147,7 +143,6 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
 
             final String dimension = String.format(
                                          EurostatConstants.TITLE_DIMENSION_FORMAT,
-                                         entry.getKey(),
                                          entry.getValue().getName());
 
             stringBuilder.append(dimension);
@@ -174,8 +169,9 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
     {
         final List<Subject> subjects = new LinkedList<>();
 
-        for (String key : source.getDimensions().keySet()) {
-            Subject subject = new Subject(key, EurostatConstants.LANGUAGE_DEFAULT_VALUE);
+        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
+            Subject subject = new Subject(entry.getValue().getName(),
+                                          EurostatConstants.LANGUAGE_DEFAULT_VALUE);
             subjects.add(subject);
         }
 
@@ -200,8 +196,9 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
                 stringBuilder.append(EurostatConstants.DESCRIPTION_DIMENSION_SEPARATOR);
 
             final String dimension = String.format(
-                                         EurostatConstants.TITLE_DIMENSION_FORMAT,
+                                         EurostatConstants.DESCRIPTION_DIMENSION_FORMAT,
                                          entry.getKey(),
+                                         entry.getValue().getId(),
                                          entry.getValue().getName());
 
             stringBuilder.append(dimension);

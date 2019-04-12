@@ -51,8 +51,8 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     private StringParameter rightsNameParam;
     private StringParameter rightsUriParam;
     private StringParameter restBaseUrlParam;
-    private StringParameter dataProductRegexParam; 
-    private StringParameter allowedDimensionsParam; 
+    private StringParameter dataProductRegexParam;
+    private StringParameter allowedDimensionsParam;
 
     /**
      * Constructor
@@ -139,18 +139,18 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
                                         urlMappingFunction));
 
         this.dataProductRegexParam = Configuration.registerParameter(
-                                  new StringParameter(
-                                      EurostatConstants.DATA_PRODUCT_REGEX_KEY,
-                                      getName(),
-                                      EurostatConstants.DATA_PRODUCT_REGEX_DEFAULT_VALUE,
-                                      stringMappingFunction));
+                                         new StringParameter(
+                                             EurostatConstants.DATA_PRODUCT_REGEX_KEY,
+                                             getName(),
+                                             EurostatConstants.DATA_PRODUCT_REGEX_DEFAULT_VALUE,
+                                             stringMappingFunction));
 
         this.allowedDimensionsParam = Configuration.registerParameter(
-                                  new StringParameter(
-                                      EurostatConstants.ALLOWED_DIMENSIONS_KEY,
-                                      getName(),
-                                      EurostatConstants.ALLOWED_DIMENSIONS_DEFAULT_VALUE,
-                                      stringMappingFunction));
+                                          new StringParameter(
+                                              EurostatConstants.ALLOWED_DIMENSIONS_KEY,
+                                              getName(),
+                                              EurostatConstants.ALLOWED_DIMENSIONS_DEFAULT_VALUE,
+                                              stringMappingFunction));
 
     }
 
@@ -243,9 +243,9 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     {
         return this.restBaseUrlParam.getValue();
     }
-    
+
     /**
-     * Getter for regex of the data product regular expression (configurable) 
+     * Getter for regex of the data product regular expression (configurable)
      *
      * @return the regex as a String
      */
@@ -261,6 +261,6 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
      */
     public List<String> getAllowedDimensions()
     {
-        return Arrays.asList(this.allowedDimensionsParam.getValue().split("\\s*,\\*"));
+        return Arrays.asList(this.allowedDimensionsParam.getValue().split("\\s*,\\s*"));
     }
 }
