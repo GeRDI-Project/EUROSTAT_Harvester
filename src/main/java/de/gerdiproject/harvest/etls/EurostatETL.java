@@ -17,7 +17,9 @@ package de.gerdiproject.harvest.etls;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -49,6 +51,8 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     private StringParameter rightsNameParam;
     private StringParameter rightsUriParam;
     private StringParameter restBaseUrlParam;
+    private StringParameter dataProductRegexParam;
+    private StringParameter allowedDimensionsParam;
 
     /**
      * Constructor
@@ -133,6 +137,21 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
                                         getName(),
                                         EurostatConstants.REST_URL_BASE_DEFAULT_VALUE,
                                         urlMappingFunction));
+
+        this.dataProductRegexParam = Configuration.registerParameter(
+                                         new StringParameter(
+                                             EurostatConstants.DATA_PRODUCT_REGEX_KEY,
+                                             getName(),
+                                             EurostatConstants.DATA_PRODUCT_REGEX_DEFAULT_VALUE,
+                                             stringMappingFunction));
+
+        this.allowedDimensionsParam = Configuration.registerParameter(
+                                          new StringParameter(
+                                              EurostatConstants.ALLOWED_DIMENSIONS_KEY,
+                                              getName(),
+                                              EurostatConstants.ALLOWED_DIMENSIONS_DEFAULT_VALUE,
+                                              stringMappingFunction));
+
     }
 
     /**
@@ -223,5 +242,25 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     public String getRestBaseUrl()
     {
         return this.restBaseUrlParam.getValue();
+    }
+
+    /**
+     * Getter for regex of the data product regular expression (configurable)
+     *
+     * @return the regex as a String
+     */
+    public String getDataProductRegex()
+    {
+        return this.dataProductRegexParam.getValue();
+    }
+
+    /**
+     * Getter for the allowed Dimensions
+     *
+     * @return a list of Strings representing the names of the allowed Dimensions
+     */
+    public List<String> getAllowedDimensions()
+    {
+        return Arrays.asList(this.allowedDimensionsParam.getValue().split("\\s*,\\s*"));
     }
 }

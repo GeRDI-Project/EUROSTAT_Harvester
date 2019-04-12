@@ -1,6 +1,8 @@
 { 
     "EurostatETL.logoUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurostat_Newlogo.png",
-    "EurostatETL.rangeTo": 10,
+    "EurostatETL.rangeTo": 15000000,
+    "EurostatETL.allowedDimensions": "NA_ITEM,GEO,UNIT,FREQ,INDICATORS,PARTNER",
+    "EurostatETL.dataProductRegex": "DSD_educ_uoe_fine06.*",
     "Submission.Loader": "DiskLoader",
-    "Submission.url": "file:/var/lib/jetty/cache/records/data.json"
+    "Submission.saveFolder": "/var/lib/jetty/cache/records"
 } 
