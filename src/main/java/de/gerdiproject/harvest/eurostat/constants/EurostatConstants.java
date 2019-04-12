@@ -15,10 +15,6 @@
  */
 package de.gerdiproject.harvest.eurostat.constants;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
