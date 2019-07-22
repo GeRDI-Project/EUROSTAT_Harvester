@@ -20,7 +20,7 @@ import java.util.List;
 
 import de.gerdiproject.harvest.application.ContextListener;
 import de.gerdiproject.harvest.etls.AbstractETL;
-import de.gerdiproject.harvest.etls.EUROSTATETL;
+import de.gerdiproject.harvest.etls.EurostatETL;
 
 import javax.servlet.annotation.WebListener;
 
@@ -30,11 +30,11 @@ import javax.servlet.annotation.WebListener;
  * @author Tobias Weber
  */
 @WebListener
-public class EUROSTATContextListener extends ContextListener
+public class EurostatContextListener extends ContextListener
 {
     @Override
     protected List<? extends AbstractETL<?, ?>> createETLs()
     {
-        return Arrays.asList(new EUROSTATETL());
+        return Arrays.asList(new EurostatETL());
     }
 }
