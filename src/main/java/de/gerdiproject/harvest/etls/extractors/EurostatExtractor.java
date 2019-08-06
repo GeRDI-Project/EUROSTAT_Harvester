@@ -41,8 +41,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
-import de.gerdiproject.harvest.etls.SdmxUtil;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
+import de.gerdiproject.harvest.eurostat.utils.SdmxUtil;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
