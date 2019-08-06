@@ -27,9 +27,9 @@ import de.gerdiproject.harvest.config.Configuration;
 import de.gerdiproject.harvest.config.parameters.StringParameter;
 import de.gerdiproject.harvest.config.parameters.constants.ParameterMappingFunctions;
 import de.gerdiproject.harvest.etls.extractors.EurostatExtractor;
-import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
 import de.gerdiproject.harvest.etls.extractors.SdmxVO;
 import de.gerdiproject.harvest.etls.transformers.EurostatTransformer;
+import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
 import de.gerdiproject.json.datacite.DataCiteJson;
 import de.gerdiproject.json.datacite.Rights;
 
@@ -164,7 +164,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     {
         try {
             return new URL(this.sdemUrlParam.getValue());
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw new IllegalStateException(EurostatConstants.MALFORMED_SDEM_URL_ERROR);
         }
     }
@@ -213,7 +213,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
      */
     public Set<String> getFormats()
     {
-        HashSet<String> formats = new HashSet<>();
+        final HashSet<String> formats = new HashSet<>();
         formats.add(this.formatParam.getValue());
         return formats;
     }
@@ -225,7 +225,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
      */
     public Set<Rights> getRightsList()
     {
-        HashSet<Rights> rightsList = new HashSet<Rights>();
+        final HashSet<Rights> rightsList = new HashSet<Rights>();
         rightsList.add(new Rights(
                            this.rightsNameParam.getValue(),
                            "en-US",

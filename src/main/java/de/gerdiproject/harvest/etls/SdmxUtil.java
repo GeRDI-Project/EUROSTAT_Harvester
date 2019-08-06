@@ -15,12 +15,11 @@
  */
 package de.gerdiproject.harvest.etls;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * This class bundles static helper methods for SDMX processing
@@ -50,14 +49,14 @@ public class SdmxUtil
      *
      * @return list of maps with all combinations
      */
-    public static <K, V> List<Map<K, V>> mapOfListsToListOfMaps(Map<K, List <V>> input)
+    public static <K, V> List<Map<K, V>> mapOfListsToListOfMaps(final Map<K, List <V>> input)
     {
         final Set<Map.Entry<K, List<V>>> inputEntries = input.entrySet();
 
         // calculate number of rows
         int rowCount = 1;
 
-        for (Map.Entry<K, List<V>> e : inputEntries)
+        for (final Map.Entry<K, List<V>> e : inputEntries)
             rowCount *= e.getValue().size();
 
         // initialize all maps
@@ -69,7 +68,7 @@ public class SdmxUtil
         // fill data
         int repetitionsPerChunk = rowCount;
 
-        for (Map.Entry<K, List<V>> e : inputEntries) {
+        for (final Map.Entry<K, List<V>> e : inputEntries) {
             final K key = e.getKey();
             final List<V> values = e.getValue();
 

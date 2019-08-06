@@ -51,7 +51,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
 
 
     @Override
-    public void init(AbstractETL<?, ?> etl)
+    public void init(final AbstractETL<?, ?> etl)
     {
         eurostatETL = (EurostatETL) etl;
     }
@@ -68,10 +68,10 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      * @return The DataCiteJSON document
      */
     @Override
-    protected DataCiteJson transformElement(SdmxVO source)
+    protected DataCiteJson transformElement(final SdmxVO source)
     {
-        String identifier = getIdentifier(source);
-        DataCiteJson document = createDataCiteStub(identifier);
+        final String identifier = getIdentifier(source);
+        final DataCiteJson document = createDataCiteStub(identifier);
 
         document.addTitles(getTitle(source));
         document.setPublisher(eurostatETL.getPublisher());
@@ -100,11 +100,11 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return String
      */
-    private String getIdentifier(SdmxVO source)
+    private String getIdentifier(final SdmxVO source)
     {
-        StringBuilder queryBuilder = new StringBuilder();
+        final StringBuilder queryBuilder = new StringBuilder();
 
-        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
+        for (final Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
             if (queryBuilder.length() != 0)
                 queryBuilder.append(EurostatConstants.QUERY_PARAM_SEPARATOR);
 
@@ -114,7 +114,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
                               entry.getValue().getId()));
         }
 
-        String queryString = queryBuilder.toString();
+        final String queryString = queryBuilder.toString();
 
         return String.format(
                    EurostatConstants.IDENTIFIER_FORMAT,
@@ -134,11 +134,11 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return Collection with one title
      */
-    private Collection<Title> getTitle(SdmxVO source)
+    private Collection<Title> getTitle(final SdmxVO source)
     {
-        StringBuilder stringBuilder = new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder();
 
-        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
+        for (final Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
             if (stringBuilder.length() != 0)
                 stringBuilder.append(EurostatConstants.TITLE_DIMENSION_SEPARATOR);
 
@@ -167,13 +167,13 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return Collection with subjects
      */
-    private Collection<Subject> getSubjects(SdmxVO source)
+    private Collection<Subject> getSubjects(final SdmxVO source)
     {
         final List<Subject> subjects = new LinkedList<>();
 
-        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
-            Subject subject = new Subject(entry.getValue().getName(),
-                                          EurostatConstants.LANGUAGE_DEFAULT_VALUE);
+        for (final Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
+            final Subject subject = new Subject(entry.getValue().getName(),
+                                                EurostatConstants.LANGUAGE_DEFAULT_VALUE);
             subjects.add(subject);
         }
 
@@ -190,11 +190,11 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return Collection with one description
      */
-    private Collection<Description> getDescription(SdmxVO source)
+    private Collection<Description> getDescription(final SdmxVO source)
     {
-        StringBuilder stringBuilder = new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder();
 
-        for (Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
+        for (final Map.Entry<String, CodeBean> entry : source.getDimensions().entrySet()) {
             if (stringBuilder.length() != 0)
                 stringBuilder.append(EurostatConstants.DESCRIPTION_DIMENSION_SEPARATOR);
 
@@ -226,7 +226,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return Boolean indicating the availability of geo-related information
      */
-    private boolean hasGeoDimension(SdmxVO source)
+    private boolean hasGeoDimension(final SdmxVO source)
     {
         if (source.getDimensions().get(EurostatConstants.GEO_DIMENSION) != null)
             return true;
@@ -244,7 +244,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return Collection with one GeoLocation
      */
-    private Collection<GeoLocation> getGeoLocations(SdmxVO source)
+    private Collection<GeoLocation> getGeoLocations(final SdmxVO source)
     {
         final List<GeoLocation> geoLocations = new LinkedList<>();
         geoLocations.add(
@@ -264,9 +264,9 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return Collection with one ResearchData object
      */
-    private Collection<ResearchData> getResearchData(SdmxVO source)
+    private Collection<ResearchData> getResearchData(final SdmxVO source)
     {
-        List<ResearchData> researchData = new LinkedList<>();
+        final List<ResearchData> researchData = new LinkedList<>();
         researchData.add(new ResearchData(
                              getIdentifier(source),
                              source.getEnglishOrFirstName()));
@@ -282,9 +282,9 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      *
      * @return the DataCiteJson document
      */
-    private DataCiteJson createDataCiteStub(String identifier)
+    private DataCiteJson createDataCiteStub(final String identifier)
     {
-        DataCiteJson document = new DataCiteJson(identifier);
+        final DataCiteJson document = new DataCiteJson(identifier);
 
         document.setPublisher(eurostatETL.getPublisher());
         document.setPublicationYear(Calendar.getInstance().get(Calendar.YEAR));
