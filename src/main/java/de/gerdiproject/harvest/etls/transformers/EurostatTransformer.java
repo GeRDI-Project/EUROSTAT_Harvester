@@ -49,12 +49,13 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
 {
     private EurostatETL eurostatETL;
 
+
     @Override
     public void init(AbstractETL<?, ?> etl)
     {
-        super.init(etl);
         eurostatETL = (EurostatETL) etl;
     }
+
 
     /**
      * Returns a DataCiteJson for a given dimension selection.
@@ -86,6 +87,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
         document.addResearchData(getResearchData(source));
         return document;
     }
+
 
     /**
      * Returns an Identifier for the document.
@@ -121,6 +123,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
                    queryString);
     }
 
+
     /**
      * Creates a title for the document.
      *
@@ -154,6 +157,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
         return Arrays.asList(new Title(titleString));
     }
 
+
     /**
      * Creates a collection of subjects for the document.
      *
@@ -175,6 +179,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
 
         return subjects;
     }
+
 
     /**
      * Creates a description for the document.
@@ -212,6 +217,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
                                  DescriptionType.Abstract));
     }
 
+
     /**
      * Indicator whether there is geo-related information in the dimensions.
      *
@@ -227,6 +233,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
 
         return false;
     }
+
 
     /**
      * Creates a geoLocation-field for the document.
@@ -247,6 +254,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
         return geoLocations;
     }
 
+
     /**
      * Creates ResearchData information for the document.
      *
@@ -264,6 +272,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
                              source.getEnglishOrFirstName()));
         return researchData;
     }
+
 
     /**
      * Creates a stub for a DataCiteJson object (with fields that are
@@ -286,5 +295,12 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
         document.addRights(eurostatETL.getRightsList());
 
         return document;
+    }
+
+
+    @Override
+    public void clear()
+    {
+        // nothing to clean up
     }
 }

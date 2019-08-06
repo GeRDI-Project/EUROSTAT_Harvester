@@ -29,21 +29,19 @@ import org.sdmxsource.sdmx.api.model.StructureWorkspace;
 import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
-import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.codelist.CodeSuperBean;
+import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DimensionSuperBean;
 import org.sdmxsource.sdmx.api.util.ReadableDataLocation;
 import org.sdmxsource.util.factory.SdmxSourceReadableDataLocationFactory;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
 import de.gerdiproject.harvest.etls.SdmxUtil;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
@@ -54,7 +52,6 @@ import org.slf4j.LoggerFactory;
 public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 {
     private String version = null;
-    private int size = -1;
     private EurostatETL eurostatETL;
 
     private StructureParsingManager parser;
@@ -80,17 +77,20 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         version = sdem.getStructureBeans(false).getHeader().getId();
     }
 
+
     @Override
     public String getUniqueVersionString()
     {
         return version;
     }
 
+
     @Override
     public int size()
     {
-        return size;
+        return -1;
     }
+
 
     @Override
     protected Iterator<SdmxVO> extractAll() throws ExtractorException
@@ -100,6 +100,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
                                     this.parser,
                                     this.eurostatETL);
     }
+
 
     /**
      * Get a list of dimension values which are both configured and present in the data structure
@@ -130,6 +131,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         //Build a list of all possible combinations of values of each dimension.
         return SdmxUtil.mapOfListsToListOfMaps(input);
     }
+
 
     /**
      * Get a list of all Codes given a dimensionId
@@ -171,6 +173,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         private StructureParsingManager parser;
         private EurostatETL etl;
 
+
         /**
          * Adds a set of DataflowBeans to the harvest queue
          *
@@ -198,11 +201,13 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
         }
 
+
         @Override
         public boolean hasNext()
         {
             return !(dataflows.isEmpty() && chunkedDataflow.isEmpty());
         }
+
 
         @Override
         public SdmxVO next()
@@ -255,5 +260,12 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
             return chunkedDataflow.remove();
         }
+    }
+
+
+    @Override
+    public void clear()
+    {
+        // nothing to clean up
     }
 }
