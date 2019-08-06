@@ -31,9 +31,9 @@ import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
  */
 public class SdmxVO
 {
-    private List<TextTypeWrapper> names;
-    private DataStructureBean dataStructureBean;
-    private Map<String, CodeBean> dimensions;
+    private final List<TextTypeWrapper> names;
+    private final DataStructureBean dataStructureBean;
+    private final Map<String, CodeBean> dimensions;
 
     /**
      * Constructor
@@ -41,9 +41,9 @@ public class SdmxVO
      * @param TextTypeWrapper List of names for the dataflow in different locales
      * @param DataStructureBean DataStructureBean with dimensions and codelists.
      */
-    public SdmxVO(List<TextTypeWrapper> names,
-                  DataStructureBean dataStructureBean,
-                  Map<String, CodeBean> dimensions)
+    public SdmxVO(final List<TextTypeWrapper> names,
+                  final DataStructureBean dataStructureBean,
+                  final Map<String, CodeBean> dimensions)
     {
         this.names = names;
         this.dataStructureBean = dataStructureBean;
@@ -67,7 +67,7 @@ public class SdmxVO
      */
     public String getEnglishOrFirstName()
     {
-        for (TextTypeWrapper text : this.names) {
+        for (final TextTypeWrapper text : this.names) {
             if (text.getLocale().equals("en"))
                 return text.getValue();
         }
