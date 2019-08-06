@@ -30,6 +30,7 @@ import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
 import org.sdmxsource.sdmx.api.model.superbeans.codelist.CodeSuperBean;
+import org.sdmxsource.sdmx.api.model.superbeans.codelist.CodelistSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DimensionSuperBean;
 import org.sdmxsource.sdmx.api.util.ReadableDataLocation;
@@ -51,14 +52,14 @@ import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
  */
 public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 {
-    private String version = null;
+    private String version;
     private EurostatETL eurostatETL;
 
     private StructureParsingManager parser;
     private StructureWorkspace sdem;
     private SdmxSourceReadableDataLocationFactory rdlFactory;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EurostatExtractor.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(EurostatExtractor.class);
 
     @Override
     public void init(final AbstractETL<?, ?> etl)
@@ -124,7 +125,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
             final List<CodeSuperBean> codeList = getCodeList(dataStructureSuperBean, id);
 
-            if (codeList.size() > 0)
+            if (!codeList.isEmpty())
                 input.put(id, getCodeList(dataStructureSuperBean, id));
         }
 
@@ -149,12 +150,18 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         final DimensionSuperBean dimensionSuperBean = dataStructureSuperBean
                                                       .getDimensionById(dimensionId);
 
-        try {
-            for (final CodeSuperBean code : dimensionSuperBean.getCodelist(true).getCodes())
-                codes.add(code);
-        } catch (final NullPointerException e) {
+        final CodelistSuperBean codeList = dimensionSuperBean == null
+                                           ? null
+                                           : dimensionSuperBean.getCodelist(true);
+
+        final List<CodeSuperBean> codeBeans =  codeList == null
+                                               ? null
+                                               : codeList.getCodes();
+
+        if (codeBeans == null)
             LOGGER.warn(String.format("No Codes for %s, will be ignored!", dimensionId));
-        }
+        else
+            codes.addAll(codeBeans);
 
         return codes;
     }

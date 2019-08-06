@@ -21,11 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * This class bundles static helper methods for SDMX processing
  *
  * @author Tobias Weber
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SdmxUtil
 {
     /**

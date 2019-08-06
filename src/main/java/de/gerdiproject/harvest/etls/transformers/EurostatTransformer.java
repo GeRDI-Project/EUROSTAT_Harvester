@@ -228,10 +228,7 @@ public class EurostatTransformer extends AbstractIteratorTransformer<SdmxVO, Dat
      */
     private boolean hasGeoDimension(final SdmxVO source)
     {
-        if (source.getDimensions().get(EurostatConstants.GEO_DIMENSION) != null)
-            return true;
-
-        return false;
+        return source.getDimensions().get(EurostatConstants.GEO_DIMENSION) != null;
     }
 
 

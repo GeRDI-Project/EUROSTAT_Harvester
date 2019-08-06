@@ -44,6 +44,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     // URLs
     private StringParameter sdemUrlParam;
     private StringParameter logoUrlParam;
+
     // configurable default values
     private StringParameter publisherParam;
     private StringParameter languageParam;
@@ -61,11 +62,6 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     {
         super(new EurostatExtractor(), new EurostatTransformer());
     }
-
-    //TODO: add or remove EventListeners?
-    //TODO: Do we need createTransformer- or createExtractor-methods.
-
-
 
 
     @Override
@@ -154,6 +150,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
 
     }
 
+
     /**
      * Getter for the Structural Data Exchange Message (SDEM).
      * The URL is directly retrieved from the corresponding parameter or from the default value.
@@ -165,9 +162,10 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
         try {
             return new URL(this.sdemUrlParam.getValue());
         } catch (final MalformedURLException e) {
-            throw new IllegalStateException(EurostatConstants.MALFORMED_SDEM_URL_ERROR);
+            throw new IllegalStateException(EurostatConstants.MALFORMED_SDEM_URL_ERROR); // NOPMD stack trace not needed here
         }
     }
+
 
     /**
      * Getter for the URL that should point to the repository provider logo.
@@ -179,6 +177,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     {
         return this.logoUrlParam.getValue();
     }
+
 
     /**
      * Getter for the default DataCite publisher value
@@ -192,6 +191,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
         return this.publisherParam.getValue();
     }
 
+
     /**
      * Getter for the default DataCite language value
      * The value is directly retrieved from the corresponding parameter
@@ -203,6 +203,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     {
         return this.languageParam.getValue();
     }
+
 
     /**
      * Getter for the default DataCite formats
@@ -217,6 +218,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
         formats.add(this.formatParam.getValue());
         return formats;
     }
+
 
     /**
      * Getter for the default rightsList
@@ -234,6 +236,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
         return rightsList;
     }
 
+
     /**
      * Getter for the rest base URL (configurable)
      *
@@ -244,6 +247,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
         return this.restBaseUrlParam.getValue();
     }
 
+
     /**
      * Getter for regex of the data product regular expression (configurable)
      *
@@ -253,6 +257,7 @@ public class EurostatETL extends StaticIteratorETL<SdmxVO, DataCiteJson>
     {
         return this.dataProductRegexParam.getValue();
     }
+
 
     /**
      * Getter for the allowed Dimensions
