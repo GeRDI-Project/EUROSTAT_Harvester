@@ -18,11 +18,11 @@ package de.gerdiproject.harvest;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.annotation.WebListener;
+
 import de.gerdiproject.harvest.application.ContextListener;
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
-
-import javax.servlet.annotation.WebListener;
 
 /**
  * This class serves as an entry point for initializing the web service.

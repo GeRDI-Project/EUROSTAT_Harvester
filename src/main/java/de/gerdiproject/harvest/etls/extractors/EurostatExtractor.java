@@ -29,21 +29,20 @@ import org.sdmxsource.sdmx.api.model.StructureWorkspace;
 import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataflowBean;
-import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.codelist.CodeSuperBean;
+import org.sdmxsource.sdmx.api.model.superbeans.codelist.CodelistSuperBean;
+import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DataStructureSuperBean;
 import org.sdmxsource.sdmx.api.model.superbeans.datastructure.DimensionSuperBean;
 import org.sdmxsource.sdmx.api.util.ReadableDataLocation;
 import org.sdmxsource.util.factory.SdmxSourceReadableDataLocationFactory;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import de.gerdiproject.harvest.etls.AbstractETL;
 import de.gerdiproject.harvest.etls.EurostatETL;
-import de.gerdiproject.harvest.etls.SdmxUtil;
 import de.gerdiproject.harvest.eurostat.constants.EurostatConstants;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.gerdiproject.harvest.eurostat.utils.SdmxUtil;
 
 /**
  * This {@linkplain AbstractIteratorExtractor} implementation extracts all
@@ -53,32 +52,32 @@ import org.slf4j.LoggerFactory;
  */
 public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 {
-    private String version = null;
-    private int size = -1;
+    private String version;
     private EurostatETL eurostatETL;
 
     private StructureParsingManager parser;
     private StructureWorkspace sdem;
     private SdmxSourceReadableDataLocationFactory rdlFactory;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EurostatExtractor.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(EurostatExtractor.class);
 
     @Override
-    public void init(AbstractETL<?, ?> etl)
+    public void init(final AbstractETL<?, ?> etl)
     {
         super.init(etl);
         eurostatETL = (EurostatETL) etl;
 
         //This nonsense is the only way to avoid a NullPointerException that I (weber@lrz.de) found.
         //We need to let spring initialise the specific class in order to initialise them correctly
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/beans.xml");
+        final ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/beans.xml");
         rdlFactory = (SdmxSourceReadableDataLocationFactory) context.getBean("readableDataLocationFactory");
         parser = (StructureParsingManager) context.getBean("structureParsingManager");
 
-        ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(this.eurostatETL.getSdemUrl());
+        final ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(this.eurostatETL.getSdemUrl());
         sdem = parser.parseStructures(rdl);
         version = sdem.getStructureBeans(false).getHeader().getId();
     }
+
 
     @Override
     public String getUniqueVersionString()
@@ -86,11 +85,13 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
         return version;
     }
 
+
     @Override
     public int size()
     {
-        return size;
+        return -1;
     }
+
 
     @Override
     protected Iterator<SdmxVO> extractAll() throws ExtractorException
@@ -101,6 +102,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
                                     this.eurostatETL);
     }
 
+
     /**
      * Get a list of dimension values which are both configured and present in the data structure
      *
@@ -109,27 +111,28 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
      * @return a list of all possible combinations of codes of each allowed and present dimension
      */
     public static List<Map<String, CodeSuperBean>> getDimensionCombinations(
-        DataStructureSuperBean dataStructureSuperBean,
-        EurostatETL etl)
+        final DataStructureSuperBean dataStructureSuperBean,
+        final EurostatETL etl)
     {
-        HashMap<String, List<CodeSuperBean>> input = new HashMap<String, List<CodeSuperBean>>();
+        final HashMap<String, List<CodeSuperBean>> input = new HashMap<String, List<CodeSuperBean>>();
 
         // get all dimensions that are allowed AND existent in source
-        for (DimensionSuperBean dimensionSuperBean : dataStructureSuperBean.getDimensions()) {
+        for (final DimensionSuperBean dimensionSuperBean : dataStructureSuperBean.getDimensions()) {
             final String id = dimensionSuperBean.getId();
 
             if (etl.getAllowedDimensions().contains(id))
                 LOGGER.debug(String.format("%s is an allowed dimension", id));
 
-            List<CodeSuperBean> codeList = getCodeList(dataStructureSuperBean, id);
+            final List<CodeSuperBean> codeList = getCodeList(dataStructureSuperBean, id);
 
-            if (codeList.size() > 0)
+            if (!codeList.isEmpty())
                 input.put(id, getCodeList(dataStructureSuperBean, id));
         }
 
         //Build a list of all possible combinations of values of each dimension.
         return SdmxUtil.mapOfListsToListOfMaps(input);
     }
+
 
     /**
      * Get a list of all Codes given a dimensionId
@@ -140,19 +143,25 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
      * @return A list of all code values for the dimension in source
      */
     public static List<CodeSuperBean> getCodeList(
-        DataStructureSuperBean dataStructureSuperBean, String dimensionId)
+        final DataStructureSuperBean dataStructureSuperBean, final String dimensionId)
     {
-        LinkedList<CodeSuperBean> codes = new LinkedList<CodeSuperBean>();
+        final LinkedList<CodeSuperBean> codes = new LinkedList<CodeSuperBean>();
 
-        DimensionSuperBean dimensionSuperBean = dataStructureSuperBean
-                                                .getDimensionById(dimensionId);
+        final DimensionSuperBean dimensionSuperBean = dataStructureSuperBean
+                                                      .getDimensionById(dimensionId);
 
-        try {
-            for (CodeSuperBean code : dimensionSuperBean.getCodelist(true).getCodes())
-                codes.add(code);
-        } catch (NullPointerException e) {
+        final CodelistSuperBean codeList = dimensionSuperBean == null
+                                           ? null
+                                           : dimensionSuperBean.getCodelist(true);
+
+        final List<CodeSuperBean> codeBeans =  codeList == null
+                                               ? null
+                                               : codeList.getCodes();
+
+        if (codeBeans == null)
             LOGGER.warn(String.format("No Codes for %s, will be ignored!", dimensionId));
-        }
+        else
+            codes.addAll(codeBeans);
 
         return codes;
     }
@@ -165,21 +174,22 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
      */
     private static class EurostatIterator implements Iterator<SdmxVO>
     {
-        private Queue<DataflowBean> dataflows = new LinkedList<>();
-        private Queue<SdmxVO> chunkedDataflow = new LinkedList<>();
-        private SdmxSourceReadableDataLocationFactory rdlFactory;
-        private StructureParsingManager parser;
-        private EurostatETL etl;
+        private final Queue<DataflowBean> dataflows = new LinkedList<>();
+        private final Queue<SdmxVO> chunkedDataflow = new LinkedList<>();
+        private final SdmxSourceReadableDataLocationFactory rdlFactory;
+        private final StructureParsingManager parser;
+        private final EurostatETL etl;
+
 
         /**
          * Adds a set of DataflowBeans to the harvest queue
          *
          * @param dataflows set of DataflowBeans to be added to the queue
          */
-        public EurostatIterator(Set<DataflowBean> dataflows,
-                                SdmxSourceReadableDataLocationFactory rdlFactory,
-                                StructureParsingManager parser,
-                                EurostatETL etl)
+        public EurostatIterator(final Set<DataflowBean> dataflows,
+                                final SdmxSourceReadableDataLocationFactory rdlFactory,
+                                final StructureParsingManager parser,
+                                final EurostatETL etl)
         {
 
             this.rdlFactory = rdlFactory;
@@ -198,11 +208,13 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
         }
 
+
         @Override
         public boolean hasNext()
         {
             return !(dataflows.isEmpty() && chunkedDataflow.isEmpty());
         }
+
 
         @Override
         public SdmxVO next()
@@ -218,25 +230,25 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
                     //NullPointerExceptions. This is a workaround until the problem could be solved
                     //or the source code is available to see WHY these exceptions are thrown.
 
-                    String url = String.format(EurostatConstants.SDMX_BASE_URL_FORMAT,
-                                               dataflowBean.getDataStructureRef().getMaintainableId());
+                    final String url = String.format(EurostatConstants.SDMX_BASE_URL_FORMAT,
+                                                     dataflowBean.getDataStructureRef().getMaintainableId());
                     LOGGER.debug(url);
-                    ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(url);
-                    StructureWorkspace workspace = parser.parseStructures(rdl);
+                    final ReadableDataLocation rdl = rdlFactory.getReadableDataLocation(url);
+                    final StructureWorkspace workspace = parser.parseStructures(rdl);
 
-                    DataStructureSuperBean dataStructureSuperBean =
+                    final DataStructureSuperBean dataStructureSuperBean =
                         (DataStructureSuperBean) workspace.getSuperBeans()
                         .getDataStructures().toArray()[0];
-                    DataStructureBean dataStructureBean = dataStructureSuperBean.getBuiltFrom();
+                    final DataStructureBean dataStructureBean = dataStructureSuperBean.getBuiltFrom();
 
                     //get all dimensions from the DataStructureBean, filling up chunkedDataflow
-                    for (Map<String, CodeSuperBean> dimensionCombination :
+                    for (final Map<String, CodeSuperBean> dimensionCombination :
                          getDimensionCombinations(dataStructureSuperBean, this.etl)) {
 
-                        Map<String, CodeBean> convertedDimensionCombination
+                        final Map<String, CodeBean> convertedDimensionCombination
                             = new HashMap<String, CodeBean>();
 
-                        for (Map.Entry<String, CodeSuperBean> entry : dimensionCombination.entrySet())
+                        for (final Map.Entry<String, CodeSuperBean> entry : dimensionCombination.entrySet())
                             convertedDimensionCombination.put(entry.getKey(), entry.getValue().getBuiltFrom());
 
                         chunkedDataflow.add(new SdmxVO(
@@ -245,7 +257,7 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
                                                 convertedDimensionCombination));
                     }
 
-                } catch (SdmxException e) {
+                } catch (final SdmxException e) {
                     LOGGER.warn(String.format("Ignoring %s",
                                               dataflowBean.getDataStructureRef().getMaintainableId()));
                     LOGGER.warn(e.getMessage());
@@ -255,5 +267,12 @@ public class EurostatExtractor extends AbstractIteratorExtractor<SdmxVO>
 
             return chunkedDataflow.remove();
         }
+    }
+
+
+    @Override
+    public void clear()
+    {
+        // nothing to clean up
     }
 }

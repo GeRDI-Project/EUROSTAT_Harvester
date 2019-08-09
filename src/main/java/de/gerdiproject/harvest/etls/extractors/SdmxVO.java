@@ -23,42 +23,29 @@ import org.sdmxsource.sdmx.api.model.beans.base.TextTypeWrapper;
 import org.sdmxsource.sdmx.api.model.beans.codelist.CodeBean;
 import org.sdmxsource.sdmx.api.model.beans.datastructure.DataStructureBean;
 
+import lombok.Value;
+
 /**
  * This class is a value object that contains all extracted (meta-) data from
  * Eurostat that is required to generate a document.
  *
  * @author Tobias Weber
  */
+@Value
 public class SdmxVO
 {
-    private List<TextTypeWrapper> names;
-    private DataStructureBean dataStructureBean;
-    private Map<String, CodeBean> dimensions;
+    /**
+     * List of names for the dataflow in different locales
+     */
+    private final List<TextTypeWrapper> names;
 
     /**
-     * Constructor
-     *
-     * @param TextTypeWrapper List of names for the dataflow in different locales
-     * @param DataStructureBean DataStructureBean with dimensions and codelists.
+     * DataStructureBean with dimensions and codelists
      */
-    public SdmxVO(List<TextTypeWrapper> names,
-                  DataStructureBean dataStructureBean,
-                  Map<String, CodeBean> dimensions)
-    {
-        this.names = names;
-        this.dataStructureBean = dataStructureBean;
-        this.dimensions = dimensions;
-    }
+    private final DataStructureBean dataStructureBean;
 
-    /**
-     * Getter for the DataStructureBean
-     *
-     * @return The DataStructureBean
-     */
-    public DataStructureBean getDataStructureBean()
-    {
-        return this.dataStructureBean;
-    }
+    private final Map<String, CodeBean> dimensions;
+
 
     /**
      * Get the English name, if it exists, if not pick the first one
@@ -67,21 +54,11 @@ public class SdmxVO
      */
     public String getEnglishOrFirstName()
     {
-        for (TextTypeWrapper text : this.names) {
+        for (final TextTypeWrapper text : this.names) {
             if (text.getLocale().equals("en"))
                 return text.getValue();
         }
 
         return this.names.get(0).getValue();
-    }
-
-    /**
-     * Get the list of dimensions and values
-     *
-     * @return a Map of dimensions
-     */
-    public Map<String, CodeBean> getDimensions()
-    {
-        return this.dimensions;
     }
 }
